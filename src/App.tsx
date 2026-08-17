@@ -31,7 +31,12 @@ function App() {
 
   useEffect(() => {
     if (game) {
-      setGame(getGame());
+      const refreshed = getGame();
+      setGame(refreshed);
+      // If game is in waiting_birth but screen is map, show birth screen
+      if (refreshed?.status === 'waiting_birth' && screen !== 'waiting_birth') {
+        setScreen('waiting_birth');
+      }
     }
   }, []);
 
@@ -42,6 +47,7 @@ function App() {
   const handleCreateGame = (query: string) => {
     const g = createGame(query);
     setGame(g);
+    setScreen('waiting_birth');
   };
 
   const handleRollBirth = () => {

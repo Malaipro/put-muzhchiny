@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { RollResult } from '../lib/game';
+import { DiceCube } from './DiceCube';
 
 interface BirthDiceScreenProps {
   onRoll: () => void;
@@ -8,26 +9,22 @@ interface BirthDiceScreenProps {
 
 export function BirthDiceScreen({ onRoll, lastRoll }: BirthDiceScreenProps) {
   const [isRolling, setIsRolling] = useState(false);
-  const [displayValue, setDisplayValue] = useState<number | null>(null);
 
   const handleRoll = () => {
+    if (isRolling || lastRoll?.resultType === 'birth_success') return;
     setIsRolling(true);
-    setDisplayValue(null);
 
-    let count = 0;
-    const interval = setInterval(() => {
-      setDisplayValue(Math.floor(Math.random() * 6) + 1);
-      count++;
-      if (count > 10) {
-        clearInterval(interval);
-        onRoll();
-        setIsRolling(false);
-      }
-    }, 100);
+    // Animate for 1.2s then trigger actual roll
+    setTimeout(() => {
+      onRoll();
+      setIsRolling(false);
+    }, 1200);
   };
 
+  const isSuccess = lastRoll?.resultType === 'birth_success';
+
   return (
-    <div className="min-h-[60dvh] flex flex-col items-center justify-center py-8">
+    <div className="min-h-[60dvh] flex flex-col items-center justify-center py-8 px-safe">
       <div className="text-center mb-8">
         <h2 className="font-heading text-h1 text-bone mb-2">Вход в Путь</h2>
         <p className="text-body text-muted">
@@ -35,30 +32,34 @@ export function BirthDiceScreen({ onRoll, lastRoll }: BirthDiceScreenProps) {
         </p>
       </div>
 
-      <div className="w-32 h-32 bg-graphite rounded-2xl border-2 border-bronze/50 flex items-center justify-center mb-8 shadow-lg">
-        {displayValue !== null || lastRoll ? (
-          <span className={`font-heading text-display ${
-            lastRoll?.resultType === 'birth_success' ? 'text-bronze' : 'text-bone'
-          }`}>
-            {displayValue ?? lastRoll?.dieValue}
-          </span>
-        ) : (
-          <span className="text-muted text-h2">?</span>
-        )}
+      {/* 3D Dice */}
+      <div className="mb-8">
+        <DiceCube
+          value={lastRoll?.dieValue ?? null}
+          isRolling={isRolling}
+          size={140}
+        />
       </div>
 
+      {/* Result Message */}
       {lastRoll && !isRolling && (
-        <div className="text-center mb-6">
-          <p className="text-body text-bone">{lastRoll.message}</p>
+        <div className="text-center mb-6 max-w-xs">
+          <p className={`text-body mb-2 ${isSuccess ? 'text-bronze' : 'text-bone'}`}>
+            {lastRoll.message}
+          </p>
+          {!isSuccess && (
+            <p className="text-caption text-muted">Брось снова</p>
+          )}
         </div>
       )}
 
+      {/* Roll Button */}
       <button
         onClick={handleRoll}
-        disabled={isRolling || lastRoll?.resultType === 'birth_success'}
-        className="min-h-cta px-8 bg-bronze text-ink font-heading text-h2 rounded-card hover:opacity-90 transition-opacity disabled:opacity-30"
+        disabled={isRolling || isSuccess}
+        className="min-h-cta px-10 bg-bronze text-ink font-heading text-h2 rounded-card hover:opacity-90 transition-opacity disabled:opacity-30 disabled:cursor-not-allowed"
       >
-        {isRolling ? 'Бросок...' : 'Бросить кубик'}
+        {isRolling ? 'Бросок...' : isSuccess ? 'Путь открыт' : 'Бросить кубик'}
       </button>
     </div>
   );

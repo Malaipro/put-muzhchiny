@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { GameState } from '../lib/game';
 import type { RollResult } from '../lib/game';
+import { DiceCube } from './DiceCube';
 
 interface DiceScreenProps {
   game: GameState;
@@ -11,29 +12,21 @@ interface DiceScreenProps {
 
 export function DiceScreen({ game, lastRoll, onRoll, onBack }: DiceScreenProps) {
   const [isRolling, setIsRolling] = useState(false);
-  const [displayValue, setDisplayValue] = useState<number | null>(null);
 
   const handleRoll = () => {
+    if (isRolling) return;
     setIsRolling(true);
-    setDisplayValue(null);
 
-    // Animate
-    let count = 0;
-    const interval = setInterval(() => {
-      setDisplayValue(Math.floor(Math.random() * 6) + 1);
-      count++;
-      if (count > 10) {
-        clearInterval(interval);
-        onRoll();
-        setIsRolling(false);
-      }
-    }, 100);
+    setTimeout(() => {
+      onRoll();
+      setIsRolling(false);
+    }, 1200);
   };
 
   const isBirth = game.status === 'waiting_birth';
 
   return (
-    <div className="min-h-[60dvh] flex flex-col items-center justify-center py-8">
+    <div className="min-h-[60dvh] flex flex-col items-center justify-center py-8 px-safe">
       <button
         onClick={onBack}
         className="self-start text-caption text-muted hover:text-bone transition-colors mb-8"
@@ -54,21 +47,13 @@ export function DiceScreen({ game, lastRoll, onRoll, onBack }: DiceScreenProps) 
         </p>
       </div>
 
-      {/* Dice Display */}
-      <div className="w-32 h-32 bg-graphite rounded-2xl border-2 border-copper/30 flex items-center justify-center mb-8 shadow-lg">
-        {displayValue !== null || lastRoll ? (
-          <span className={`font-heading text-display ${
-            lastRoll?.resultType === 'birth_success' || lastRoll?.resultType === 'move'
-              ? 'text-bronze'
-              : lastRoll?.resultType === 'no_move'
-              ? 'text-red'
-              : 'text-bone'
-          }`}>
-            {displayValue ?? lastRoll?.dieValue}
-          </span>
-        ) : (
-          <span className="text-muted text-h2">?</span>
-        )}
+      {/* 3D Dice */}
+      <div className="mb-8">
+        <DiceCube
+          value={lastRoll?.dieValue ?? null}
+          isRolling={isRolling}
+          size={140}
+        />
       </div>
 
       {/* Result Message */}
@@ -90,7 +75,7 @@ export function DiceScreen({ game, lastRoll, onRoll, onBack }: DiceScreenProps) 
       <button
         onClick={handleRoll}
         disabled={isRolling}
-        className="min-h-cta px-8 bg-bronze text-ink font-heading text-h2 rounded-card hover:opacity-90 transition-opacity disabled:opacity-50"
+        className="min-h-cta px-10 bg-bronze text-ink font-heading text-h2 rounded-card hover:opacity-90 transition-opacity disabled:opacity-50"
       >
         {isRolling ? 'Бросок...' : isBirth ? 'Бросить кубик' : 'Бросить'}
       </button>
