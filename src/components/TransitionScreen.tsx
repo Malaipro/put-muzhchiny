@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { getCellById } from '../lib/cells';
 
 interface TransitionScreenProps {
@@ -9,45 +10,105 @@ export function TransitionScreen({ transition, onAccept }: TransitionScreenProps
   const fromCell = getCellById(transition.from);
   const toCell = getCellById(transition.to);
   const isSupport = transition.type === 'support';
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const t = setTimeout(() => setIsVisible(true), 50);
+    return () => clearTimeout(t);
+  }, []);
 
   return (
-    <div className="min-h-[60dvh] flex flex-col items-center justify-center py-8">
-      <div className={`w-full max-w-sm rounded-card p-6 border-2 ${
-        isSupport ? 'bg-olive/10 border-olive' : 'bg-red/10 border-red'
-      }`}>
-        <h2 className={`font-heading text-display text-center mb-4 ${
-          isSupport ? 'text-olive' : 'text-red'
-        }`}>
+    <div
+      className={`min-h-[60dvh] flex flex-col items-center justify-center py-8 px-safe transition-all duration-700 ${
+        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+      }`}
+    >
+      {/* Atmosphere container */}
+      <div
+        className={`relative w-full max-w-sm rounded-card p-6 border-2 overflow-hidden ${
+          isSupport
+            ? 'bg-gradient-to-b from-olive/15 to-graphite border-olive/60'
+            : 'bg-gradient-to-b from-red/10 to-graphite border-red/50'
+        }`}
+      >
+        {/* Decorative line — up for support, down for breakdown */}
+        <div
+          className={`absolute left-1/2 -translate-x-1/2 w-px transition-all duration-700 ${
+            isSupport
+              ? 'top-0 h-16 bg-gradient-to-b from-bronze via-olive to-transparent'
+              : 'bottom-0 h-16 bg-gradient-to-t from-red via-copper to-transparent'
+          }`}
+        />
+
+        {/* Title */}
+        <h2
+          className={`font-heading text-display text-center mb-6 pt-4 ${
+            isSupport ? 'text-olive' : 'text-red'
+          }`}
+        >
           {isSupport ? 'ОПОРА' : 'СРЫВ'}
         </h2>
 
-        <div className="text-center mb-6">
-          <div className="flex items-center justify-center gap-3 text-body text-bone mb-2">
-            <span>{transition.from}. {fromCell?.kempName}</span>
-            <span className={isSupport ? 'text-olive' : 'text-red'}>
-              {isSupport ? '↑' : '↓'}
-            </span>
-            <span>{transition.to}. {toCell?.kempName}</span>
+        {/* Arrow visualization */}
+        <div className="flex items-center justify-center gap-4 mb-6">
+          <div className="text-center">
+            <span className="text-caption text-muted block mb-1">{transition.from}</span>
+            <span className="text-body text-bone/80">{fromCell?.kempName}</span>
           </div>
-          <p className="text-caption text-muted">
-            {isSupport
-              ? `${fromCell?.kempName} поднимает к ${toCell?.kempName}.`
-              : `${fromCell?.kempName} возвращает к ${toCell?.kempName}.`}
-          </p>
+
+          <div className={`flex flex-col items-center ${isSupport ? 'animate-bounce' : 'animate-pulse'}`}>
+            <div
+              className={`w-10 h-10 rounded-full flex items-center justify-center border-2 ${
+                isSupport
+                  ? 'border-olive bg-olive/20 text-olive'
+                  : 'border-red bg-red/20 text-red'
+              }`}
+            >
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                {isSupport ? (
+                  <path d="M12 19V5M5 12l7-7 7 7" />
+                ) : (
+                  <path d="M12 5v14M5 12l7 7 7-7" />
+                )}
+              </svg>
+            </div>
+          </div>
+
+          <div className="text-center">
+            <span className="text-caption text-muted block mb-1">{transition.to}</span>
+            <span className="text-body text-bone/80">{toCell?.kempName}</span>
+          </div>
         </div>
 
-        {fromCell?.transitionExplanation && (
-          <p className="text-body text-bone/80 text-center mb-6 leading-relaxed">
+        {/* Explanation */}
+        {fromCell?.transitionExplanation ? (
+          <p className="text-body text-bone/80 text-center mb-6 leading-relaxed px-2">
             {fromCell.transitionExplanation}
+          </p>
+        ) : (
+          <p className="text-body text-muted text-center mb-6 leading-relaxed px-2">
+            {isSupport
+              ? `${fromCell?.kempName} открывает путь к ${toCell?.kempName}. Это усиление.`
+              : `${fromCell?.kempName} возвращает к ${toCell?.kempName}. Это часть маршрута — материал для работы.`}
           </p>
         )}
 
+        {/* CTA */}
         <button
           onClick={onAccept}
-          className={`w-full min-h-cta font-heading text-h2 rounded-card transition-opacity hover:opacity-90 ${
+          className={`w-full min-h-cta font-heading text-h2 rounded-card transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] ${
             isSupport
-              ? 'bg-olive text-bone'
-              : 'bg-red text-bone'
+              ? 'bg-gradient-to-r from-olive to-olive/80 text-bone shadow-lg shadow-olive/20'
+              : 'bg-gradient-to-r from-red to-red/80 text-bone shadow-lg shadow-red/20'
           }`}
         >
           {isSupport ? `Подняться на клетку ${transition.to}` : `Спуститься на клетку ${transition.to}`}
