@@ -14,6 +14,7 @@
   body {
     margin: 0;
     min-height: 100dvh;
+    background: #111310;
   }
 
   #root {
@@ -21,5 +22,39 @@
     max-width: 430px;
     margin: 0 auto;
     background: #111310;
+    position: relative;
+  }
+
+  /* Topographic background pattern */
+  #root::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 430px;
+    height: 100%;
+    background-image: url('/src/assets/topography.svg');
+    background-size: 400px 400px;
+    opacity: 0.4;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Ensure content is above background */
+  #root > * {
+    position: relative;
+    z-index: 1;
+  }
+}
+
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
   }
 }
