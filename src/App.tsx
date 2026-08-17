@@ -14,6 +14,7 @@ import {
   type RollResult,
 } from './lib/game';
 import { getCellById } from './lib/cells';
+import { useTelegram } from './hooks/useTelegram';
 import { Onboarding } from './components/Onboarding';
 import { BirthDiceScreen } from './components/BirthDiceScreen';
 import { GameBoard } from './components/GameBoard';
@@ -28,6 +29,8 @@ function App() {
   const [screen, setScreen] = useState<string>('map');
   const [lastRoll, setLastRoll] = useState<RollResult | null>(null);
   const [transition, setTransition] = useState<{ type: 'support' | 'breakdown'; from: number; to: number } | null>(null);
+
+  const { hapticImpact, hapticSuccess, hapticError, isInTelegram } = useTelegram();
 
   useEffect(() => {
     if (game) {
@@ -51,26 +54,35 @@ function App() {
   };
 
   const handleRollBirth = () => {
+    if (isInTelegram) hapticImpact('medium');
     const result = rollBirthDice();
     setLastRoll(result);
     refreshGame();
     if (result.resultType === 'birth_success') {
+      if (isInTelegram) hapticSuccess();
       setTimeout(() => setScreen('cell'), 1500);
+    } else {
+      if (isInTelegram) hapticError();
     }
   };
 
   const handleRollDice = () => {
+    if (isInTelegram) hapticImpact('medium');
     const result = rollDice();
     setLastRoll(result);
     refreshGame();
     if (result.resultType === 'move') {
+      if (isInTelegram) hapticSuccess();
       setTimeout(() => setScreen('cell'), 1500);
+    } else {
+      if (isInTelegram) hapticError();
     }
   };
 
   const handleCompleteVisit = (visitId: string) => {
     const result = completeVisit(visitId);
     refreshGame();
+    if (isInTelegram) hapticSuccess();
     if (result.transition) {
       setTransition(result.transition);
       setScreen('transition');
@@ -82,6 +94,7 @@ function App() {
   };
 
   const handleAcceptTransition = (fromCellId: number) => {
+    if (isInTelegram) hapticImpact('light');
     acceptTransition(fromCellId);
     setTransition(null);
     refreshGame();
