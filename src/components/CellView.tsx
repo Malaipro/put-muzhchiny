@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { Cell } from '../types';
 import type { VisitRecord } from '../lib/game';
+import { getCellImagePath } from '../lib/cellImages';
 
 interface CellViewProps {
   cell: Cell;
@@ -24,6 +25,8 @@ export function CellView({ cell, visit, isUnlocked, onComplete, onBack }: CellVi
   const [activeTab, setActiveTab] = useState('short');
   const [reflections, setReflections] = useState<Record<string, string>>({});
   const [challengeDone, setChallengeDone] = useState(false);
+
+  const cellImage = getCellImagePath(cell.id);
 
   const handleReflectionChange = (q: string, value: string) => {
     setReflections(prev => ({ ...prev, [q]: value }));
@@ -123,8 +126,9 @@ export function CellView({ cell, visit, isUnlocked, onComplete, onBack }: CellVi
     <div className="py-4">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
-        <button onClick={onBack} className="text-caption text-muted hover:text-bone transition-colors">
-          ← Назад
+        <button onClick={onBack} className="flex items-center gap-1 text-caption text-muted hover:text-bone transition-colors">
+          <img src="/icons/action_back.svg" alt="Назад" width={16} height={16} />
+          Назад
         </button>
         <span className="text-caption text-muted">
           {visit.visitMode === 'introduction' ? 'Знакомство' :
@@ -132,8 +136,16 @@ export function CellView({ cell, visit, isUnlocked, onComplete, onBack }: CellVi
         </span>
       </div>
 
-      {/* Cell Title */}
+      {/* Cell Art & Title */}
       <div className="mb-4">
+        {cellImage && (
+          <img
+            src={cellImage}
+            alt={cell.kempName}
+            className="w-full h-48 object-cover rounded-card mb-3"
+            draggable={false}
+          />
+        )}
         <span className="text-caption text-muted">Клетка {cell.id}</span>
         <h2 className="font-heading text-h1 text-bone">{cell.kempName}</h2>
         <p className="text-caption text-muted">{cell.subtitle}</p>

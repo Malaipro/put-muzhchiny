@@ -23,7 +23,10 @@ export function Onboarding({ onStart }: OnboardingProps) {
 
   if (step === 0) {
     return (
-      <div className="min-h-dvh flex flex-col items-center justify-center px-safe py-section">
+      <div 
+        className="min-h-dvh flex flex-col items-center justify-center px-safe py-section bg-cover bg-center"
+        style={{ backgroundImage: 'url(/textures/onboarding_background_390x844.png)' }}
+      >
         <div className="text-center max-w-sm">
           <h1 className="font-heading text-display text-bronze mb-4">
             {steps[0].title}

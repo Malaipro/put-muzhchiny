@@ -25,11 +25,12 @@ export function TransitionScreen({ transition, onAccept }: TransitionScreenProps
     >
       {/* Atmosphere container */}
       <div
-        className={`relative w-full max-w-sm rounded-card p-6 border-2 overflow-hidden ${
-          isSupport
-            ? 'bg-gradient-to-b from-olive/15 to-graphite border-olive/60'
-            : 'bg-gradient-to-b from-red/10 to-graphite border-red/50'
+        className={`relative w-full max-w-sm rounded-card p-6 border-2 overflow-hidden bg-cover bg-center ${
+          isSupport ? 'border-olive/60' : 'border-red/50'
         }`}
+        style={{
+          backgroundImage: `url(/textures/${isSupport ? 'support_background_390x844.png' : 'breakdown_background_390x844.png'})`,
+        }}
       >
         {/* Decorative line — up for support, down for breakdown */}
         <div
