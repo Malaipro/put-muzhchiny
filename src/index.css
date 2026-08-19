@@ -25,23 +25,6 @@
     position: relative;
   }
 
-  /* Topographic background pattern */
-  #root::before {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 100%;
-    max-width: 430px;
-    height: 100%;
-    background-image: url('/textures/base_graphite_topography_400.png');
-    background-size: 400px 400px;
-    opacity: 0.4;
-    pointer-events: none;
-    z-index: 0;
-  }
-
   /* Ensure content is above background */
   #root > * {
     position: relative;

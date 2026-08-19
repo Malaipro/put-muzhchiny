@@ -1,5 +1,7 @@
 import { useState } from 'react';
 
+import { getPublicUrl } from '../lib/assets';
+
 interface OnboardingProps {
   onStart: (query: string) => void;
 }
@@ -25,7 +27,7 @@ export function Onboarding({ onStart }: OnboardingProps) {
     return (
       <div 
         className="min-h-dvh flex flex-col items-center justify-center px-safe py-section bg-cover bg-center"
-        style={{ backgroundImage: 'url(/textures/onboarding_background_390x844.png)' }}
+        style={{ backgroundImage: `url(${getPublicUrl('/textures/onboarding_background_390x844.png')})` }}
       >
         <div className="text-center max-w-sm">
           <h1 className="font-heading text-display text-bronze mb-4">
