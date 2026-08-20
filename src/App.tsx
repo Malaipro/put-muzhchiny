@@ -15,6 +15,7 @@ import {
 } from './lib/game';
 import { getCellById } from './lib/cells';
 import { useTelegram } from './hooks/useTelegram';
+import { getPublicUrl } from './lib/assets';
 import { Onboarding } from './components/Onboarding';
 import { BirthDiceScreen } from './components/BirthDiceScreen';
 import { GameBoard } from './components/GameBoard';
@@ -36,7 +37,6 @@ function App() {
     if (game) {
       const refreshed = getGame();
       setGame(refreshed);
-      // If game is in waiting_birth but screen is map, show birth screen
       if (refreshed?.status === 'waiting_birth' && screen !== 'waiting_birth') {
         setScreen('waiting_birth');
       }
@@ -122,6 +122,19 @@ function App() {
 
   return (
     <div className="min-h-dvh bg-ink text-bone flex flex-col">
+      {/* Topographic background */}
+      <div
+        className="fixed inset-0 pointer-events-none z-0"
+        style={{
+          backgroundImage: `url(${getPublicUrl('/textures/base_graphite_topography_400.png')})`,
+          backgroundSize: '400px 400px',
+          opacity: 0.4,
+          maxWidth: '430px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+        }}
+      />
+
       {/* Header */}
       <header className="px-safe pt-4 pb-2 flex items-center justify-between">
         <h1 className="font-heading text-h1 text-bronze tracking-wide">ПУТЬ МУЖЧИНЫ</h1>

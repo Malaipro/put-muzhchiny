@@ -1,3 +1,5 @@
+import { getPublicUrl } from '../lib/assets';
+
 interface BottomNavProps {
   active: string;
   onNavigate: (screen: string) => void;
@@ -24,7 +26,7 @@ export function BottomNav({ active, onNavigate }: BottomNavProps) {
             }`}
           >
             <img
-              src={item.icon}
+              src={getPublicUrl(item.icon)}
               alt={item.label}
               width={20}
               height={20}

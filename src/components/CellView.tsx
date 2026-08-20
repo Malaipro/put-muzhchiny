@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { Cell } from '../types';
 import type { VisitRecord } from '../lib/game';
 import { getCellImagePath } from '../lib/cellImages';
+import { getPublicUrl } from '../lib/assets';
 
 interface CellViewProps {
   cell: Cell;
@@ -27,6 +28,7 @@ export function CellView({ cell, visit, isUnlocked, onComplete, onBack }: CellVi
   const [challengeDone, setChallengeDone] = useState(false);
 
   const cellImage = getCellImagePath(cell.id);
+  const cellImageUrl = cellImage ? getPublicUrl(cellImage) : null;
 
   const handleReflectionChange = (q: string, value: string) => {
     setReflections(prev => ({ ...prev, [q]: value }));
@@ -127,7 +129,7 @@ export function CellView({ cell, visit, isUnlocked, onComplete, onBack }: CellVi
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <button onClick={onBack} className="flex items-center gap-1 text-caption text-muted hover:text-bone transition-colors">
-          <img src="/icons/action_back.svg" alt="Назад" width={16} height={16} />
+          <img src={getPublicUrl('/icons/action_back.svg')} alt="Назад" width={16} height={16} />
           Назад
         </button>
         <span className="text-caption text-muted">
@@ -138,9 +140,9 @@ export function CellView({ cell, visit, isUnlocked, onComplete, onBack }: CellVi
 
       {/* Cell Art & Title */}
       <div className="mb-4">
-        {cellImage && (
+        {cellImageUrl && (
           <img
-            src={cellImage}
+            src={cellImageUrl}
             alt={cell.kempName}
             className="w-full h-48 object-cover rounded-card mb-3"
             draggable={false}

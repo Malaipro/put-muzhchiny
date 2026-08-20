@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { getPublicUrl } from '../lib/assets';
 
 interface DiceCubeProps {
   value: number | null;
@@ -40,7 +40,7 @@ export function DiceCube({ value, isRolling, size = 128 }: DiceCubeProps) {
   return (
     <div className="relative flex items-center justify-center">
       <img
-        src={`/dice/dice_face_${displayValue}.png`}
+        src={getPublicUrl(`/dice/dice_face_${displayValue}.png`)}
         alt={`Кубик: ${displayValue}`}
         width={size}
         height={size}

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { getPublicUrl } from '../lib/assets';
 import { getCellById } from '../lib/cells';
 
 interface TransitionScreenProps {
@@ -29,7 +30,7 @@ export function TransitionScreen({ transition, onAccept }: TransitionScreenProps
           isSupport ? 'border-olive/60' : 'border-red/50'
         }`}
         style={{
-          backgroundImage: `url(/textures/${isSupport ? 'support_background_390x844.png' : 'breakdown_background_390x844.png'})`,
+          backgroundImage: `url(${getPublicUrl(`/textures/${isSupport ? 'support_background_390x844.png' : 'breakdown_background_390x844.png'}`)})`,
         }}
       >
         {/* Decorative line — up for support, down for breakdown */}
