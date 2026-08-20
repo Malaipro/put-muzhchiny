@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { getPublicUrl } from '../lib/assets';
 
 interface DiceCubeProps {
