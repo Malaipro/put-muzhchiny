@@ -1,6 +1,7 @@
 import type { GameState, VisitRecord } from '../lib/game';
 import { getCellById } from '../lib/cells';
 import { getVisits, isVisitUnlocked } from '../lib/game';
+import { getPublicUrl } from '../lib/assets';
 
 interface GameBoardProps {
   game: GameState;
@@ -95,46 +96,51 @@ export function GameBoard({ game, currentVisit, onRoll, onOpenCell }: GameBoardP
         </div>
       )}
 
-      {/* Game Grid */}
-      <div className="bg-graphite/50 rounded-card p-3 border border-copper/10">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="font-heading text-h2 text-bone">Карта Пути</h3>
-          <span className="text-caption text-muted">{game.currentCellId > 0 ? `Текущая: ${game.currentCellId}` : 'Не начат'}</span>
-        </div>
-        <div className="grid grid-cols-9 gap-1">
-          {rows.flat().map((cellId) => {
-            const isCurrent = cellId === game.currentCellId;
-            const isVisited = visitedCells.has(cellId);
-            const cell = getCellById(cellId);
-            const isSupport = cell?.transitionType === 'support';
-            const isBreakdown = cell?.transitionType === 'breakdown';
+      {/* Game Grid with map background */}
+      <div 
+        className="rounded-card p-3 border border-copper/10 bg-cover bg-center"
+        style={{ backgroundImage: `url(${getPublicUrl('/screens/02_path_map.png')})` }}
+      >
+        <div className="bg-graphite/70 rounded-card p-3">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-heading text-h2 text-bone">Карта Пути</h3>
+            <span className="text-caption text-muted">{game.currentCellId > 0 ? `Текущая: ${game.currentCellId}` : 'Не начат'}</span>
+          </div>
+          <div className="grid grid-cols-9 gap-1">
+            {rows.flat().map((cellId) => {
+              const isCurrent = cellId === game.currentCellId;
+              const isVisited = visitedCells.has(cellId);
+              const cell = getCellById(cellId);
+              const isSupport = cell?.transitionType === 'support';
+              const isBreakdown = cell?.transitionType === 'breakdown';
 
-            return (
-              <button
-                key={cellId}
-                onClick={() => {}}
-                className={`aspect-square rounded flex items-center justify-center text-[10px] font-medium leading-none ${
-                  isCurrent
-                    ? 'bg-bronze text-ink ring-2 ring-bronze/50'
-                    : isBreakdown
-                    ? 'bg-red/30 text-red'
-                    : isSupport
-                    ? 'bg-olive/30 text-olive'
-                    : isVisited
-                    ? 'bg-copper/20 text-bone/70'
-                    : 'bg-ink text-muted/50'
-                }`}
-              >
-                {cellId}
-              </button>
-            );
-          })}
-        </div>
-        <div className="flex gap-3 mt-3 text-caption">
-          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-bronze"/>Текущая</span>
-          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-olive"/>Опора</span>
-          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-red"/>Срыв</span>
-          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-copper/40"/>Посещена</span>
+              return (
+                <button
+                  key={cellId}
+                  onClick={() => {}}
+                  className={`aspect-square rounded flex items-center justify-center text-[10px] font-medium leading-none ${
+                    isCurrent
+                      ? 'bg-bronze text-ink ring-2 ring-bronze/50'
+                      : isBreakdown
+                      ? 'bg-red/30 text-red'
+                      : isSupport
+                      ? 'bg-olive/30 text-olive'
+                      : isVisited
+                      ? 'bg-copper/20 text-bone/70'
+                      : 'bg-ink text-muted/50'
+                  }`}
+                >
+                  {cellId}
+                </button>
+              );
+            })}
+          </div>
+          <div className="flex gap-3 mt-3 text-caption">
+            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-bronze"/>Текущая</span>
+            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-olive"/>Опора</span>
+            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-red"/>Срыв</span>
+            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-copper/40"/>Посещена</span>
+          </div>
         </div>
       </div>
 
