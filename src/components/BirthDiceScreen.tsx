@@ -27,6 +27,10 @@ export function BirthDiceScreen({ onRoll, lastRoll }: BirthDiceScreenProps) {
     <div 
       className="min-h-dvh flex flex-col relative bg-ink"
       style={{ 
+        backgroundImage: `url(${getPublicUrl('/textures/base_graphite_topography_400.png?v=2')})`, 
+        backgroundRepeat: 'repeat', 
+        backgroundSize: '200px' 
+      }} 
         backgroundImage: `url(${getPublicUrl('/textures/base_graphite_topography_400.png')})`, 
         backgroundRepeat: 'repeat', 
         backgroundSize: '200px' 
