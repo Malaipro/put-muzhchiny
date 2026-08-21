@@ -26,7 +26,7 @@ export function BirthDiceScreen({ onRoll, lastRoll }: BirthDiceScreenProps) {
 
   return (
     <div 
-      className="min-h-dvh flex flex-col relative bg-cover bg-center bg-no-repeat"
+      className="min-h-dvh flex flex-col relative bg-cover bg-top bg-no-repeat"
       style={{ backgroundImage: `url(${getPublicUrl('/screens/03_dice_idle.png')})` }}
     >
       {/* Rolling dice animation — centered on screen */}
