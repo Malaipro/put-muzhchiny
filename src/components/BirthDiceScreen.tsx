@@ -26,7 +26,7 @@ export function BirthDiceScreen({ onRoll, lastRoll }: BirthDiceScreenProps) {
 
   return (
     <div 
-      className="fixed inset-0 bg-cover bg-center bg-no-repeat"
+      className="min-h-dvh flex flex-col relative bg-cover bg-center bg-no-repeat"
       style={{ backgroundImage: `url(${getPublicUrl('/screens/03_dice_idle.png')})` }}
     >
       {/* Rolling dice animation — centered on screen */}
@@ -56,8 +56,11 @@ export function BirthDiceScreen({ onRoll, lastRoll }: BirthDiceScreenProps) {
         </div>
       )}
 
+      {/* Spacer pushes button to bottom */}
+      <div className="flex-1" />
+
       {/* Bottom action area */}
-      <div className="absolute bottom-0 left-0 right-0 px-6 pb-28 pt-8 bg-gradient-to-t from-ink/80 via-ink/40 to-transparent">
+      <div className="px-6 pb-24 pt-8 bg-gradient-to-t from-ink/80 via-ink/40 to-transparent">
         <button
           onClick={handleRoll}
           disabled={isRolling || isSuccess}
