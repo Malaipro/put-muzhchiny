@@ -26,40 +26,38 @@ export function BirthDiceScreen({ onRoll, lastRoll }: BirthDiceScreenProps) {
 
   return (
     <div 
-      className="min-h-dvh flex flex-col items-center justify-end pb-24 px-safe bg-cover bg-center"
+      className="fixed inset-0 bg-cover bg-center bg-no-repeat"
       style={{ backgroundImage: `url(${getPublicUrl('/screens/03_dice_idle.png')})` }}
     >
-      {/* Text overlay at bottom */}
-      <div className="text-center mb-6 w-full max-w-sm">
-        <h2 className="font-heading text-h1 text-bone mb-2 drop-shadow-lg">Вход в Путь</h2>
-        <p className="text-body text-bone/80 drop-shadow mb-4">
-          Бросай кубик до выпадения шестёрки. Только она открывает путь.
-        </p>
-
-        {/* Animated dice overlay (only during roll) */}
-        {isRolling && (
-          <div className="flex justify-center mb-4">
+      {/* Rolling dice animation — centered on screen */}
+      {isRolling && (
+        <div className="absolute inset-0 flex items-center justify-center z-10">
+          <div className="bg-graphite/60 backdrop-blur-sm rounded-2xl p-8">
             <DiceCube
               value={lastRoll?.dieValue ?? null}
               isRolling={isRolling}
-              size={120}
+              size={160}
             />
           </div>
-        )}
+        </div>
+      )}
 
-        {/* Result Message */}
-        {lastRoll && !isRolling && (
-          <div className="mb-4">
-            <p className={`text-body mb-1 ${isSuccess ? 'text-bronze' : 'text-bone'} drop-shadow`}>
+      {/* Result overlay — centered, only after roll completes */}
+      {lastRoll && !isRolling && (
+        <div className="absolute inset-0 flex items-center justify-center z-10">
+          <div className="bg-graphite/80 backdrop-blur-sm rounded-2xl p-6 mx-6 text-center max-w-xs">
+            <p className={`text-h2 font-heading mb-2 ${isSuccess ? 'text-bronze' : 'text-bone'}`}>
               {lastRoll.message}
             </p>
             {!isSuccess && (
               <p className="text-caption text-bone/60">Брось снова</p>
             )}
           </div>
-        )}
+        </div>
+      )}
 
-        {/* Roll Button */}
+      {/* Bottom action area */}
+      <div className="absolute bottom-0 left-0 right-0 px-6 pb-28 pt-8 bg-gradient-to-t from-ink/80 via-ink/40 to-transparent">
         <button
           onClick={handleRoll}
           disabled={isRolling || isSuccess}

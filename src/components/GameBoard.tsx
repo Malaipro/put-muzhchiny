@@ -101,7 +101,7 @@ export function GameBoard({ game, currentVisit, onRoll, onOpenCell }: GameBoardP
         className="rounded-card p-3 border border-copper/10 bg-cover bg-center"
         style={{ backgroundImage: `url(${getPublicUrl('/screens/02_path_map.png')})` }}
       >
-        <div className="bg-graphite/70 rounded-card p-3">
+        <div className="bg-graphite/30 rounded-card p-3">
           <div className="flex items-center justify-between mb-3">
             <h3 className="font-heading text-h2 text-bone">Карта Пути</h3>
             <span className="text-caption text-muted">{game.currentCellId > 0 ? `Текущая: ${game.currentCellId}` : 'Не начат'}</span>
