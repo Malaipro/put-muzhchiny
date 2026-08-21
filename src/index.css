@@ -57,4 +57,25 @@
   .animate-dice-shake {
     animation: dice-shake 0.4s ease-in-out infinite;
   }
+
+  @keyframes dice-3d-roll {
+    0%   { transform: translateY(0) rotateX(0deg) rotateY(0deg) rotateZ(0deg); }
+    18%  { transform: translateY(-32px) rotateX(170deg) rotateY(120deg) rotateZ(35deg); }
+    55%  { transform: translateY(-8px) rotateX(520deg) rotateY(410deg) rotateZ(180deg); }
+    78%  { transform: translateY(5px) rotateX(660deg) rotateY(570deg) rotateZ(260deg); }
+    90%  { transform: translateY(-3px) rotateX(700deg) rotateY(610deg) rotateZ(285deg); }
+    100% { transform: translateY(0) rotateX(var(--final-x, 720deg)) rotateY(var(--final-y, 360deg)) rotateZ(0deg); }
+  }
+
+  .animate-dice-3d-roll {
+    animation: dice-3d-roll 1.35s cubic-bezier(.22,1,.36,1) both;
+  }
+
+  .bg-graphite-tile {
+    background-image: url('/put-muzhchiny/textures/base_graphite_topography_400.png');
+    background-repeat: repeat;
+    background-size: 200px;
+  }
+    animation: dice-shake 0.4s ease-in-out infinite;
+  }
 }
