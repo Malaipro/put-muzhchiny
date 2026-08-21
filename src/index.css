@@ -71,7 +71,7 @@
     animation: dice-3d-roll 1.35s cubic-bezier(.22,1,.36,1) both;
   }
 
-  .bg-graphite-tile {
+  .animate-dice-3d-roll {
     background-image: url('/put-muzhchiny/textures/base_graphite_topography_400.png');
     background-repeat: repeat;
     background-size: 200px;

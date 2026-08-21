@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { RollResult } from '../lib/game';
+import { getPublicUrl } from '../lib/assets';
 import { Dice3D } from './Dice3D';
 
 interface BirthDiceScreenProps {
@@ -23,7 +24,14 @@ export function BirthDiceScreen({ onRoll, lastRoll }: BirthDiceScreenProps) {
   const isSuccess = lastRoll?.resultType === 'birth_success';
 
   return (
-    <div className="min-h-dvh flex flex-col relative bg-graphite-tile bg-ink">
+    <div 
+      className="min-h-dvh flex flex-col relative bg-ink"
+      style={{ 
+        backgroundImage: `url(${getPublicUrl('/textures/base_graphite_topography_400.png')})`, 
+        backgroundRepeat: 'repeat', 
+        backgroundSize: '200px' 
+      }}
+    >
       {/* Header text */}
       <div className="pt-12 px-6 text-center">
         <h1 className="font-heading text-display text-bronze tracking-widest uppercase">
