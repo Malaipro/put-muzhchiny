@@ -70,12 +70,4 @@
   .animate-dice-3d-roll {
     animation: dice-3d-roll 1.35s cubic-bezier(.22,1,.36,1) both;
   }
-
-  .animate-dice-3d-roll {
-    background-image: url('/put-muzhchiny/textures/base_graphite_topography_400.png');
-    background-repeat: repeat;
-    background-size: 200px;
-  }
-    animation: dice-shake 0.4s ease-in-out infinite;
-  }
 }
