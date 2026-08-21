@@ -1,7 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { RollResult } from '../lib/game';
 import { getPublicUrl } from '../lib/assets';
-import { Dice3D } from './Dice3D';
 
 interface BirthDiceScreenProps {
   onRoll: () => void;
@@ -10,12 +9,28 @@ interface BirthDiceScreenProps {
 
 export function BirthDiceScreen({ onRoll, lastRoll }: BirthDiceScreenProps) {
   const [isRolling, setIsRolling] = useState(false);
+  const [displayValue, setDisplayValue] = useState(4);
+
+  useEffect(() => {
+    if (!isRolling && lastRoll?.dieValue) {
+      setDisplayValue(lastRoll.dieValue);
+    }
+  }, [lastRoll, isRolling]);
 
   const handleRoll = () => {
     if (isRolling || lastRoll?.resultType === 'birth_success') return;
     setIsRolling(true);
 
+    // Rapid face cycling during roll
+    let count = 0;
+    const interval = setInterval(() => {
+      setDisplayValue(Math.floor(Math.random() * 6) + 1);
+      count++;
+      if (count > 12) clearInterval(interval);
+    }, 100);
+
     setTimeout(() => {
+      clearInterval(interval);
       onRoll();
       setIsRolling(false);
     }, 1350);
@@ -27,11 +42,7 @@ export function BirthDiceScreen({ onRoll, lastRoll }: BirthDiceScreenProps) {
     <div 
       className="min-h-dvh flex flex-col relative bg-ink"
       style={{ 
-        backgroundImage: `url(${getPublicUrl('/textures/base_graphite_topography_400.png?v=2')})`, 
-        backgroundRepeat: 'repeat', 
-        backgroundSize: '200px' 
-      }} 
-        backgroundImage: `url(${getPublicUrl('/textures/base_graphite_topography_400.png')})`, 
+        backgroundImage: `url(${getPublicUrl('/textures/base_graphite_topography_400.png?v=3')})`, 
         backgroundRepeat: 'repeat', 
         backgroundSize: '200px' 
       }}
@@ -48,10 +59,14 @@ export function BirthDiceScreen({ onRoll, lastRoll }: BirthDiceScreenProps) {
 
       {/* Center content - dice */}
       <div className="flex-1 flex flex-col items-center justify-center px-6">
-        <Dice3D
-          value={lastRoll?.dieValue ?? null}
-          isRolling={isRolling}
-          size={160}
+        <img
+          src={getPublicUrl(`/dice/dice_face_${displayValue}.png`)}
+          alt={`Кубик: ${displayValue}`}
+          width={160}
+          height={160}
+          className={`drop-shadow-2xl ${isRolling ? 'animate-dice-shake' : ''}`}
+          style={{ filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.5))' }}
+          draggable={false}
         />
 
         {/* Subtitle under dice */}
