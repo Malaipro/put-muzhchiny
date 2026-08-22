@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import type { RollResult } from '../lib/game';
 import { getPublicUrl } from '../lib/assets';
 import { DiceCube } from './DiceCube';
