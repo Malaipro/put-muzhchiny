@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { RollResult } from '../lib/game';
 import { getPublicUrl } from '../lib/assets';
+import { DiceCube } from './DiceCube';
 
 interface BirthDiceScreenProps {
   onRoll: () => void;
@@ -9,31 +10,15 @@ interface BirthDiceScreenProps {
 
 export function BirthDiceScreen({ onRoll, lastRoll }: BirthDiceScreenProps) {
   const [isRolling, setIsRolling] = useState(false);
-  const [displayValue, setDisplayValue] = useState(4);
-
-  useEffect(() => {
-    if (!isRolling && lastRoll?.dieValue) {
-      setDisplayValue(lastRoll.dieValue);
-    }
-  }, [lastRoll, isRolling]);
 
   const handleRoll = () => {
     if (isRolling || lastRoll?.resultType === 'birth_success') return;
     setIsRolling(true);
 
-    // Rapid face cycling during roll
-    let count = 0;
-    const interval = setInterval(() => {
-      setDisplayValue(Math.floor(Math.random() * 6) + 1);
-      count++;
-      if (count > 12) clearInterval(interval);
-    }, 100);
-
     setTimeout(() => {
-      clearInterval(interval);
       onRoll();
       setIsRolling(false);
-    }, 1350);
+    }, 1200);
   };
 
   const isSuccess = lastRoll?.resultType === 'birth_success';
@@ -42,44 +27,56 @@ export function BirthDiceScreen({ onRoll, lastRoll }: BirthDiceScreenProps) {
     <div 
       className="min-h-dvh flex flex-col relative bg-ink"
       style={{ 
-        backgroundImage: `url(${getPublicUrl('/textures/base_graphite_topography_400.png?v=3')})`, 
-        backgroundRepeat: 'repeat', 
-        backgroundSize: '200px' 
+        backgroundImage: `url(${getPublicUrl('/screens/03_dice_idle.png')})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'top center',
+        backgroundRepeat: 'no-repeat',
       }}
     >
-      {/* Header text */}
-      <div className="pt-12 px-6 text-center">
-        <h1 className="font-heading text-display text-bronze tracking-widest uppercase">
+      {/* Dark gradient overlay at bottom for button readability */}
+      <div className="absolute inset-x-0 bottom-0 h-64 bg-gradient-to-t from-ink via-ink/60 to-transparent pointer-events-none" />
+
+      {/* Header text - positioned over the top area */}
+      <div className="relative z-10 pt-14 px-6 text-center">
+        <h1 className="font-heading text-display text-bronze tracking-[0.2em] uppercase drop-shadow-lg">
           Путь Мужчины
         </h1>
-        <p className="font-heading text-h2 text-muted mt-1">
+        <p className="font-heading text-h2 text-muted mt-2 tracking-wide drop-shadow">
           Кубик пути
         </p>
       </div>
 
-      {/* Center content - dice */}
-      <div className="flex-1 flex flex-col items-center justify-center px-6">
-        <img
-          src={getPublicUrl(`/dice/dice_face_${displayValue}.png`)}
-          alt={`Кубик: ${displayValue}`}
-          width={160}
-          height={160}
-          className={`drop-shadow-2xl ${isRolling ? 'animate-dice-shake' : ''}`}
-          style={{ filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.5))' }}
-          draggable={false}
-        />
+      {/* Spacer - pushes content below the dice in the background image */}
+      <div className="flex-1" />
 
-        {/* Subtitle under dice */}
-        <p className="text-body text-bone/80 text-center mt-8 max-w-xs">
-          Ты готов сделать следующий шаг?<br />
-          <span className="text-muted">Доверься Пути. Брось кубик.</span>
+      {/* Text below the background dice */}
+      <div className="relative z-10 px-6 text-center mb-4">
+        <p className="text-body text-bone/90 drop-shadow">
+          Ты готов сделать следующий шаг?
+        </p>
+        <p className="text-caption text-muted mt-1 drop-shadow">
+          Доверься Пути. Брось кубик.
         </p>
       </div>
 
+      {/* Rolling overlay - centered dice animation */}
+      {isRolling && (
+        <div className="absolute inset-0 z-20 flex items-center justify-center bg-ink/40 backdrop-blur-sm">
+          <div className="flex flex-col items-center">
+            <DiceCube
+              value={lastRoll?.dieValue ?? null}
+              isRolling={isRolling}
+              size={160}
+            />
+            <p className="text-body text-bone mt-6 font-heading">Бросок...</p>
+          </div>
+        </div>
+      )}
+
       {/* Result overlay */}
       {lastRoll && !isRolling && (
-        <div className="absolute inset-0 flex items-center justify-center z-10 bg-ink/60 backdrop-blur-sm">
-          <div className="bg-graphite rounded-2xl p-6 mx-6 text-center max-w-xs border border-bronze/20">
+        <div className="absolute inset-0 z-20 flex items-center justify-center bg-ink/50 backdrop-blur-sm">
+          <div className="bg-graphite/90 rounded-2xl p-6 mx-6 text-center max-w-xs border border-bronze/30 shadow-2xl">
             <p className={`text-h1 font-heading mb-2 ${isSuccess ? 'text-bronze' : 'text-bone'}`}>
               {lastRoll.message}
             </p>
@@ -91,11 +88,11 @@ export function BirthDiceScreen({ onRoll, lastRoll }: BirthDiceScreenProps) {
       )}
 
       {/* Bottom action area */}
-      <div className="px-6 pb-24 pt-4">
+      <div className="relative z-10 px-6 pb-28 pt-4">
         <button
           onClick={handleRoll}
           disabled={isRolling || isSuccess}
-          className="w-full min-h-cta bg-bronze text-ink font-heading text-h2 rounded-card hover:opacity-90 transition-opacity disabled:opacity-30 disabled:cursor-not-allowed shadow-lg flex items-center justify-center gap-2"
+          className="w-full min-h-cta bg-bronze text-ink font-heading text-h2 rounded-card hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-30 disabled:cursor-not-allowed shadow-xl flex items-center justify-center gap-2"
         >
           <span>{isRolling ? 'Бросок...' : isSuccess ? 'Путь открыт' : 'Бросить кубик'}</span>
           {!isRolling && !isSuccess && (
