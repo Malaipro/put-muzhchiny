@@ -15,7 +15,6 @@ import {
 } from './lib/game';
 import { getCellById } from './lib/cells';
 import { useTelegram } from './hooks/useTelegram';
-import { getPublicUrl } from './lib/assets';
 import { Onboarding } from './components/Onboarding';
 import { BirthDiceScreen } from './components/BirthDiceScreen';
 import { GameBoard } from './components/GameBoard';
@@ -122,18 +121,6 @@ function App() {
 
   return (
     <div className="min-h-dvh bg-ink text-bone flex flex-col">
-      {/* Topographic background */}
-      <div
-        className="fixed inset-0 pointer-events-none z-0"
-        style={{
-          backgroundImage: `url(${getPublicUrl('/textures/base_graphite_topography_400.png')})`,
-          backgroundSize: '400px 400px',
-          opacity: 0.4,
-          maxWidth: '430px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-        }}
-      />
 
       {/* Header */}
       <header className="px-safe pt-4 pb-2 flex items-center justify-between">
