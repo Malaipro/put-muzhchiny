@@ -6,8 +6,5 @@ build:
   dockerfile: Dockerfile
   skip: false
 run:
-  image: null
-  command: null
-  args: null
   persistenceMount: /data
   containerPort: "80"
