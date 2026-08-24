@@ -1,7 +1,7 @@
 # Multi-stage build for Amvera / any Docker host
 # Stage 1: Build React app
 FROM node:20-alpine AS builder
-ARG BUILD_DATE=2026-08-23-v4
+ARG BUILD_DATE=2026-08-24-v5
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci
