@@ -5,14 +5,12 @@ interface DiceIdleScreenProps {
   onRoll: () => void;
   onBack: () => void;
   canRoll?: boolean;
-  currentCellId?: number;
 }
 
 export function DiceIdleScreen({ 
   onRoll, 
   onBack, 
   canRoll = true,
-  currentCellId,
 }: DiceIdleScreenProps) {
   const [isPressed, setIsPressed] = useState(false);
   const [isRolling, setIsRolling] = useState(false);

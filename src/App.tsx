@@ -184,7 +184,6 @@ function App() {
             onRoll={handleRollBirth}
             onBack={() => setScreen('map')}
             canRoll={true}
-            currentCellId={game.currentCellId}
           />
         )}
       </main>
