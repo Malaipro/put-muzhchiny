@@ -17,8 +17,8 @@ export default {
         muted: '#918F86',
       },
       fontFamily: {
-        heading: ['Oswald', 'Roboto Condensed', 'Arial Narrow', 'sans-serif'],
-        body: ['Inter', 'Manrope', 'system-ui', 'sans-serif'],
+        heading: ['Cinzel', 'serif'],
+        body: ['Manrope', 'system-ui', 'sans-serif'],
       },
       fontSize: {
         display: ['36px', { lineHeight: '1.1', fontWeight: '500' }],

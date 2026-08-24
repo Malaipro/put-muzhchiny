@@ -16,7 +16,7 @@ import {
 import { getCellById } from './lib/cells';
 import { useTelegram } from './hooks/useTelegram';
 import { Onboarding } from './components/Onboarding';
-import { BirthDiceScreen } from './components/BirthDiceScreen';
+import { DiceIdleScreen } from './components/DiceIdleScreen';
 import { GameBoard } from './components/GameBoard';
 import { CellView } from './components/CellView';
 import { DiceScreen } from './components/DiceScreen';
@@ -180,9 +180,11 @@ function App() {
         )}
 
         {screen === 'waiting_birth' && game.status === 'waiting_birth' && (
-          <BirthDiceScreen
+          <DiceIdleScreen
             onRoll={handleRollBirth}
-            lastRoll={lastRoll}
+            onBack={() => setScreen('map')}
+            canRoll={true}
+            currentCellId={game.currentCellId}
           />
         )}
       </main>
