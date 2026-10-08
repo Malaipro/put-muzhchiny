@@ -25,50 +25,87 @@ export function Onboarding({ onStart }: OnboardingProps) {
 
   if (step === 0) {
     return (
-      <div 
-        className="min-h-dvh flex flex-col items-center justify-center px-safe py-section bg-cover bg-center"
-        style={{ backgroundImage: `url(${getPublicUrl('/textures/onboarding_background_390x844.png')})` }}
+      <section
+        className="onboarding-hero relative min-h-dvh overflow-hidden bg-ink"
+        style={{
+          backgroundImage: `url(${getPublicUrl('/textures/base_graphite_topography_400.png')})`,
+          backgroundPosition: 'center',
+          backgroundRepeat: 'repeat',
+          backgroundSize: '400px 400px',
+        }}
       >
-        <div className="text-center max-w-sm">
-          <h1 className="font-heading text-display text-bronze mb-4">
-            {steps[0].title}
+        <div aria-hidden="true" className="onboarding-hero__light pointer-events-none absolute inset-0" />
+
+        <main className="relative z-10 mx-auto grid min-h-dvh w-full max-w-[390px] grid-rows-[auto_1fr_auto] justify-items-center px-5 pb-[calc(env(safe-area-inset-bottom)+28px)] pt-[calc(env(safe-area-inset-top)+72px)] text-center">
+          <h1 className="onboarding-hero__title font-heading text-[38px] font-medium leading-none tracking-[0.015em] text-bone">
+            Путь Мужчины
           </h1>
-          <p className="text-h2 text-bone mb-6">{steps[0].subtitle}</p>
-          <p className="text-body text-muted mb-10 leading-relaxed">
-            {steps[0].text}
-          </p>
+
+          <div className="onboarding-cube relative flex w-full items-center justify-center self-center">
+            <div aria-hidden="true" className="onboarding-cube__glow absolute" />
+            <img
+              src={getPublicUrl('/runtime/cube_B_v001/cube_B_idle.webp')}
+              alt="Бронзовый игровой кубик Путь Мужчины"
+              className="onboarding-cube__image relative z-10 h-auto w-[380px] max-w-none select-none"
+              draggable={false}
+            />
+          </div>
+
           <button
             onClick={() => setStep(1)}
-            className="w-full min-h-cta bg-bronze text-ink font-heading text-h2 rounded-card hover:opacity-90 transition-opacity"
+            className="onboarding-cta relative min-h-[64px] w-full max-w-[330px] overflow-hidden px-8 font-heading text-[23px] font-semibold tracking-[0.015em] text-bone transition duration-150 active:translate-y-[2px] active:scale-[0.985]"
           >
-            Начать Путь
+            <span aria-hidden="true" className="onboarding-cta__inner absolute inset-[4px]" />
+            <span className="relative z-10">Начать Путь</span>
           </button>
-        </div>
-      </div>
+        </main>
+      </section>
     );
   }
 
   return (
-    <div className="min-h-dvh flex flex-col px-safe py-section">
-      <h2 className="font-heading text-h1 text-bronze mb-2">{steps[1].title}</h2>
-      <p className="text-body text-muted mb-6">{steps[1].subtitle}</p>
+    <section className="gameplay-screen flex min-h-dvh flex-col px-5 pb-[calc(env(safe-area-inset-bottom)+28px)] pt-[calc(env(safe-area-inset-top)+24px)]">
+      <header className="flex items-center justify-between">
+        <button onClick={() => setStep(0)} className="gameplay-back">← Назад</button>
+        <span className="gameplay-eyebrow">ПЕРЕД НАЧАЛОМ</span>
+      </header>
 
-      <textarea
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        placeholder="Например: Почему я не довожу начатое до конца?"
-        className="w-full flex-1 min-h-[120px] bg-graphite text-bone rounded-card p-4 text-body resize-none border border-copper/30 focus:border-bronze focus:outline-none mb-6"
-      />
+      <div className="mt-7">
+        <p className="gameplay-eyebrow">ИСХОДНАЯ ТОЧКА</p>
+        <h1 className="gameplay-title mt-2">Твой запрос</h1>
+        <p className="mt-3 text-[15px] leading-[1.55] text-muted">{steps[1].subtitle}</p>
+      </div>
 
-      <p className="text-caption text-muted mb-6">{steps[1].text}</p>
+      <label className="mt-7 block">
+        <span className="mb-3 block text-xs font-bold tracking-[0.1em] text-bronze">ВОПРОС ИЛИ ЖИЗНЕННАЯ ТЕМА</span>
+        <textarea
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+          placeholder="Например: почему я не довожу начатое до конца?"
+          className="reflection-textarea min-h-[210px]"
+          autoFocus
+        />
+      </label>
 
-      <button
-        onClick={() => query.trim() && onStart(query.trim())}
-        disabled={!query.trim()}
-        className="w-full min-h-cta bg-bronze text-ink font-heading text-h2 rounded-card hover:opacity-90 transition-opacity disabled:opacity-30 disabled:cursor-not-allowed"
-      >
-        Войти в Путь
-      </button>
-    </div>
+      <article className="gameplay-card mt-4">
+        <span className="gameplay-card__label">ВАЖНО</span>
+        <p className="mt-2 text-sm leading-[1.55] text-bone/78">
+          {steps[1].text} Все клетки и ответы будут рассматриваться через эту исходную точку.
+        </p>
+      </article>
+
+      <div className="mt-auto pt-8">
+        <button
+          onClick={() => query.trim() && onStart(query.trim())}
+          disabled={!query.trim()}
+          className="gameplay-primary-button disabled:cursor-not-allowed disabled:opacity-35"
+        >
+          Войти в Путь
+        </button>
+        <p className="mt-3 text-center text-xs leading-relaxed text-muted">
+          После подтверждения изменить запрос в текущем прохождении будет нельзя.
+        </p>
+      </div>
+    </section>
   );
 }

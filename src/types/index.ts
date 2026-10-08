@@ -35,6 +35,8 @@ export interface Cell {
   nodeQuestions?: string[];
   challenge: string;
   challengeAlternative?: string;
+  finalQuestion?: string;
+  contentVersion?: string;
   formula: string;
   tags?: string[];
   transitionType: TransitionType;

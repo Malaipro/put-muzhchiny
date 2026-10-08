@@ -1,0 +1,26 @@
+.playtest {background:#101211 url('/v005/backgrounds/shell.png') center top / 100% auto no-repeat;}
+.playtest .gameplay-screen {background:linear-gradient(#101211e8,#101211f5);}
+.playtest .gameplay-primary-button {background:transparent url('/v005/cta/cta_frame_normal@2x.png') center/100% 100% no-repeat;border:0;border-radius:0;min-height:64px;padding:16px 48px;color:#f4ddb2;box-shadow:none;font-family:Georgia,serif;font-size:17px;}
+.playtest .gameplay-primary-button:active {background-image:url('/v005/cta/cta_frame_pressed@2x.png');}
+.playtest .gameplay-primary-button:disabled {background-image:url('/v005/cta/cta_frame_disabled@2x.png');}
+.playtest .gameplay-card {background:#1d1914;border-color:#6e5133;}
+.designed-board {height:calc(100dvh - 80px - env(safe-area-inset-bottom));display:flex;flex-direction:column;padding:0 17px;}
+.board-header {height:174px;flex-shrink:0;text-align:center;padding-top:127px;font-family:Georgia,serif;color:#f5deb3;}
+.board-header h1 {font-size:25px;line-height:28px;text-shadow:0 2px 3px #000;}
+.board-header p {font-size:11px;}
+.board-route {overflow-y:auto;min-height:0;flex:1;padding:14px 5px;scrollbar-width:thin;}
+.route-row {display:grid;grid-template-columns:repeat(9,minmax(0,1fr));position:relative;gap:0;margin-bottom:12px;}
+.route-row:before {content:'';position:absolute;left:4%;right:4%;height:7px;top:calc(50% - 3px);background:url('/v005/map/chain_horizontal.png') center/90px 12px repeat-x;}
+.route-row:not(:last-child):after {content:'';position:absolute;right:4%;width:7px;height:20px;top:80%;background:url('/v005/map/chain_vertical.png') center/9px 30px;}
+.route-row.reverse:after {left:4%;right:auto;}
+.route-cell {position:relative;z-index:1;display:grid;place-items:center;aspect-ratio:1;background-size:100% 100%;color:#fff2ce;font:13px Georgia,serif;text-shadow:0 1px 3px #000,1px 0 2px #000;}
+.board-footer {flex-shrink:0;padding-top:8px;}
+.board-status {background:url('/v005/status/status_card_frame@2x.png') center/100% 100% no-repeat;padding:18px 24px;min-height:118px;text-align:center;}
+.board-status p {font-size:12px;line-height:18px;color:#dbcfb9;}
+.board-status h2 {font:18px Georgia,serif;color:#f1d7a8;margin:5px 0;}
+.playtest-note {font-size:10px;text-align:center;color:#c5b99e;padding:2px 0 6px;}
+.playtest nav {background:#111 url('/v005/navigation/nav_background@2x.png') center/ min(430px,100vw) 140px no-repeat;border:0;backdrop-filter:none;}
+.playtest nav img {width:32px;height:32px;object-fit:contain;filter:brightness(1.5);}
+.playtest nav button {opacity:1;color:#d7cbb6;text-shadow:0 1px 3px #000;}
+.playtest nav button[aria-current] {color:#ffd987;}
+.playtest nav button:not([aria-current]) img {filter:saturate(.35) brightness(1.5);}

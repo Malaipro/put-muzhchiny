@@ -16,15 +16,15 @@ declare global {
           };
           start_param?: string;
         };
-        ready: () => void;
-        expand: () => void;
-        close: () => void;
-        enableClosingConfirmation: () => void;
-        disableClosingConfirmation: () => void;
-        setHeaderColor: (color: string) => void;
-        setBackgroundColor: (color: string) => void;
-        setBottomBarColor: (color: string) => void;
-        HapticFeedback: {
+        ready?: () => void;
+        expand?: () => void;
+        close?: () => void;
+        enableClosingConfirmation?: () => void;
+        disableClosingConfirmation?: () => void;
+        setHeaderColor?: (color: string) => void;
+        setBackgroundColor?: (color: string) => void;
+        setBottomBarColor?: (color: string) => void;
+        HapticFeedback?: {
           impactOccurred: (style: 'light' | 'medium' | 'heavy' | 'rigid' | 'soft') => void;
           notificationOccurred: (type: 'error' | 'success' | 'warning') => void;
           selectionChanged: () => void;
@@ -41,51 +41,55 @@ declare global {
 
 export function useTelegram() {
   const tg = typeof window !== 'undefined' ? window.Telegram?.WebApp : null;
+  // The SDK also creates WebApp in an ordinary browser. Non-empty initData is
+  // the reliable client-side signal that Telegram actually launched the app.
+  const isInTelegram = Boolean(tg?.initData);
 
   useEffect(() => {
-    if (!tg) return;
+    if (!tg || !isInTelegram) return;
 
     // Set KEMP colors
-    tg.setHeaderColor('#111310');
-    tg.setBackgroundColor('#111310');
-    tg.setBottomBarColor('#111310');
+    tg.setHeaderColor?.('#111310');
+    tg.setBackgroundColor?.('#111310');
+    tg.setBottomBarColor?.('#111310');
 
     // Expand to full height
-    tg.expand();
+    tg.expand?.();
 
     // Enable closing confirmation to prevent accidental exit during gameplay
-    tg.enableClosingConfirmation();
+    tg.enableClosingConfirmation?.();
 
     // Tell Telegram we're ready
-    tg.ready();
-  }, [tg]);
+    tg.ready?.();
+  }, [isInTelegram, tg]);
 
   const hapticImpact = useCallback(
     (style: 'light' | 'medium' | 'heavy' | 'rigid' | 'soft' = 'medium') => {
-      tg?.HapticFeedback?.impactOccurred(style);
+      if (isInTelegram) tg?.HapticFeedback?.impactOccurred(style);
     },
-    [tg]
+    [isInTelegram, tg]
   );
 
   const hapticSuccess = useCallback(() => {
-    tg?.HapticFeedback?.notificationOccurred('success');
-  }, [tg]);
+    if (isInTelegram) tg?.HapticFeedback?.notificationOccurred('success');
+  }, [isInTelegram, tg]);
 
   const hapticError = useCallback(() => {
-    tg?.HapticFeedback?.notificationOccurred('error');
-  }, [tg]);
+    if (isInTelegram) tg?.HapticFeedback?.notificationOccurred('error');
+  }, [isInTelegram, tg]);
 
   const hapticWarning = useCallback(() => {
-    tg?.HapticFeedback?.notificationOccurred('warning');
-  }, [tg]);
+    if (isInTelegram) tg?.HapticFeedback?.notificationOccurred('warning');
+  }, [isInTelegram, tg]);
 
   const closeApp = useCallback(() => {
-    tg?.close();
-  }, [tg]);
+    if (isInTelegram) tg?.close?.();
+  }, [isInTelegram, tg]);
 
   return {
     tg,
-    isInTelegram: !!tg,
+    isInTelegram,
+    // Cosmetic display only. Never use initDataUnsafe as proof of identity.
     user: tg?.initDataUnsafe?.user ?? null,
     hapticImpact,
     hapticSuccess,

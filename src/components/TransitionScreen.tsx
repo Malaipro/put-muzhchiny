@@ -35,7 +35,7 @@ export function TransitionScreen({ transition, onAccept }: TransitionScreenProps
       >
         {/* Decorative line — up for support, down for breakdown */}
         <div
-          className={`absolute left-1/2 -translate-x-1/2 w-px transition-all duration-700 ${
+          className={`pointer-events-none absolute left-1/2 -translate-x-1/2 w-px transition-all duration-700 ${
             isSupport
               ? 'top-0 h-16 bg-gradient-to-b from-bronze via-olive to-transparent'
               : 'bottom-0 h-16 bg-gradient-to-t from-red via-copper to-transparent'

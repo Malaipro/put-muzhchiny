@@ -1,122 +1,32 @@
-# Настройка Telegram бота для Mini App
+# Подключение к Telegram
 
-## 1. Минимальная настройка через BotFather
+## Предусловие
 
-Уже должно быть сделано:
-- `/newbot` — создан бот
-- `/setwebapp` — указан URL `https://malaipro.github.io/put-muzhchiny/` (потом заменим на Amvera)
+Нужен уже проверенный HTTPS-адрес Amvera. Он должен открывать игру и стабильно отвечать на `/healthz`.
 
-## 2. Кнопка в меню бота (Menu Button)
+## Одна настройка в BotFather
 
-Это кнопка «Открыть приложение» в правом верхнем углу чата с ботом.
+1. Открыть `@BotFather`.
+2. Выбрать `/mybots` и нужного бота.
+3. Открыть настройку Mini App. В текущем меню она может называться `Configure Mini App`, `Main Mini App` или `Menu Button`.
+4. Вставить проверенный HTTPS-адрес Amvera.
+5. Назвать кнопку `Начать путь`.
 
-Через curl (замени `YOUR_BOT_TOKEN`):
+После сохранения открыть бота с телефона и запустить игру именно из Telegram. Ссылка для проверки будет иметь вид:
 
-```bash
-curl -X POST \
-  https://api.telegram.org/botYOUR_BOT_TOKEN/setChatMenuButton \
-  -H 'Content-Type: application/json' \
-  -d '{
-    "menu_button": {
-      "type": "web_app",
-      "text": "Играть",
-      "web_app": {
-        "url": "https://malaipro.github.io/put-muzhchiny/"
-      }
-    }
-  }'
-```
+`https://t.me/<имя_бота>?startapp`
 
-## 3. Кнопка при старте (/start)
+## Что проверить в Telegram
 
-Чтобы при `/start` показывалась красивая кнопка в чате, нужен серверный webhook.
+- приложение открылось внутри Telegram, а не во внешнем браузере;
+- экран развернулся по высоте;
+- цвета верхней и нижней области Telegram совпадают с тёмным фоном игры;
+- при попытке случайно закрыть игру Telegram просит подтверждение;
+- при касаниях работает лёгкая вибрация;
+- бросок и переход на клетку проходят без ошибок.
 
-Простейший вариант — Supabase Edge Function (ниже), или можно временно использовать webhook.site для теста.
+## Безопасность
 
-### Отправка кнопки вручную (через curl)
-
-Найди свой `chat_id` (напиши боту, потом открой `https://api.telegram.org/botYOUR_BOT_TOKEN/getUpdates` и найди `"chat":{"id":123456789`)
-
-```bash
-curl -X POST \
-  https://api.telegram.org/botYOUR_BOT_TOKEN/sendMessage \
-  -H 'Content-Type: application/json' \
-  -d '{
-    "chat_id": YOUR_CHAT_ID,
-    "text": "Добро пожаловать в Путь Мужчины.\n\n72 клетки. Один запрос. Твой путь начинается здесь.",
-    "reply_markup": {
-      "inline_keyboard": [
-        [
-          {
-            "text": "🎲 Начать Путь",
-            "web_app": {
-              "url": "https://malaipro.github.io/put-muzhchiny/"
-            }
-          }
-        ]
-      ]
-    }
-  }'
-```
-
-## 4. Автоматический ответ на /start (через Supabase Edge Function)
-
-Файл: `supabase/functions/telegram-bot/index.ts`
-
-```typescript
-import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
-
-const BOT_TOKEN = Deno.env.get('BOT_TOKEN');
-const WEBAPP_URL = 'https://malaipro.github.io/put-muzhchiny/';
-
-serve(async (req) => {
-  const { message } = await req.json();
-
-  if (message?.text === '/start') {
-    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id: message.chat.id,
-        text: 'Добро пожаловать в Путь Мужчины.',
-        reply_markup: {
-          inline_keyboard: [[
-            { text: '🎲 Начать Путь', web_app: { url: WEBAPP_URL } }
-          ]]
-        }
-      })
-    });
-  }
-
-  return new Response('OK');
-});
-```
-
-Затем установи webhook:
-```bash
-curl "https://api.telegram.org/botYOUR_BOT_TOKEN/setWebhook?url=https://YOUR_PROJECT.supabase.co/functions/v1/telegram-bot"
-```
-
-## 5. Полезные API методы
-
-### Удалить webhook (если нужно отключить)
-```bash
-curl "https://api.telegram.org/botYOUR_BOT_TOKEN/deleteWebhook"
-```
-
-### Получить информацию о боте
-```bash
-curl "https://api.telegram.org/botYOUR_BOT_TOKEN/getMe"
-```
-
-### Проверить webhook
-```bash
-curl "https://api.telegram.org/botYOUR_BOT_TOKEN/getWebhookInfo"
-```
-
----
-
-**Важно:** после переезда на Amvera не забудь обновить URL во всех местах:
-1. BotFather → `/setwebapp`
-2. Menu Button (curl)
-3. Webhook / Edge Function
+- Не вставлять токен бота в код сайта, `VITE_...`-переменные, Amvera или чат.
+- Текущая версия хранит прогресс в браузере. Данные Telegram пока используются только для работы интерфейса, а не как доказательство личности.
+- Автоматические Telegram-напоминания потребуют отдельной серверной части. Она не входит в этот шаг.

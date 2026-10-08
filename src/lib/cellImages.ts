@@ -73,6 +73,25 @@ export const CELL_IMAGES: Record<number, string> = {
   72: '/cells/cell_72_istok.png',
 };
 
+/**
+ * Approved v005 cell symbols. The remaining cells intentionally keep using
+ * their legacy artwork until the matching symbol is delivered and reviewed.
+ */
+export const CELL_ICONS: Record<number, string> = {
+  1: '/v005/cell_icons/cell_icon_01.png',
+  2: '/v005/cell_icons/cell_icon_02.png',
+  3: '/v005/cell_icons/cell_icon_03.png',
+  10: '/v005/cell_icons/cell_icon_10.png',
+  52: '/v005/cell_icons/cell_icon_52.png',
+  68: '/v005/cell_icons/cell_icon_68.png',
+};
+
 export function getCellImagePath(cellId: number): string | undefined {
   return CELL_IMAGES[cellId];
+}
+
+export function getCellIconPath(cellId: number, highDensity = false): string | undefined {
+  const icon = CELL_ICONS[cellId];
+  if (!icon || !highDensity) return icon;
+  return icon.replace(/\.png$/, '@2x.png');
 }

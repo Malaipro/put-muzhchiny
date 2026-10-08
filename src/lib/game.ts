@@ -7,10 +7,15 @@ import type {
   RollResultType,
 } from '../types';
 import { CELLS } from './cells';
+import { isPlaytest } from './playtest';
 
-const STORAGE_KEY = 'kemp-game-state';
-const STORAGE_VISITS = 'kemp-visits';
-const STORAGE_ROLLS = 'kemp-rolls';
+const prefix = isPlaytest ? 'playtest-v005-' : '';
+const STORAGE_KEY = prefix + 'kemp-game-state';
+const STORAGE_VISITS = prefix + 'kemp-visits';
+const STORAGE_ROLLS = prefix + 'kemp-rolls';
+const STORAGE_REFLECTIONS = prefix + 'kemp-reflections';
+
+export const CELL_EXPERIENCE_HOURS = 12;
 
 export interface GameState {
   gameId: string;
@@ -34,6 +39,26 @@ export interface VisitRecord {
   status: VisitStatus;
   visitMode: VisitMode;
   gameVisitCount: number;
+  actionAcceptedAt: string | null;
+  actionCompletedAt: string | null;
+  notificationSentAt: string | null;
+}
+
+export type ReflectionPhase = 'initial' | 'final';
+
+export interface ReflectionRecord {
+  contentVersion?: string;
+  reflectionId: string;
+  gameId: string;
+  visitId: string;
+  cellId: number;
+  questionId: string;
+  questionText: string;
+  challengeText: string;
+  phase: ReflectionPhase;
+  answerText: string;
+  createdAt: string;
+  lockedAt: string;
 }
 
 export interface RollRecord {
@@ -55,6 +80,7 @@ function now(): string {
 }
 
 function addHours(dateStr: string, hours: number): string {
+  if (isPlaytest) return dateStr;
   const d = new Date(dateStr);
   d.setHours(d.getHours() + hours);
   return d.toISOString();
@@ -73,7 +99,13 @@ export function saveGame(game: GameState): void {
 
 export function getVisits(): VisitRecord[] {
   const raw = localStorage.getItem(STORAGE_VISITS);
-  return raw ? JSON.parse(raw) : [];
+  const visits: VisitRecord[] = raw ? JSON.parse(raw) : [];
+  return visits.map((visit) => ({
+    ...visit,
+    actionAcceptedAt: visit.actionAcceptedAt ?? null,
+    actionCompletedAt: visit.actionCompletedAt ?? null,
+    notificationSentAt: visit.notificationSentAt ?? null,
+  }));
 }
 
 export function saveVisits(visits: VisitRecord[]): void {
@@ -89,10 +121,25 @@ export function saveRolls(rolls: RollRecord[]): void {
   localStorage.setItem(STORAGE_ROLLS, JSON.stringify(rolls));
 }
 
+export function getReflections(): ReflectionRecord[] {
+  const raw = localStorage.getItem(STORAGE_REFLECTIONS);
+  const reflections: ReflectionRecord[] = raw ? JSON.parse(raw) : [];
+  return reflections.map((reflection) => ({
+    ...reflection,
+    questionText: reflection.questionText ?? '',
+    challengeText: reflection.challengeText ?? '',
+  }));
+}
+
+function saveReflections(reflections: ReflectionRecord[]): void {
+  localStorage.setItem(STORAGE_REFLECTIONS, JSON.stringify(reflections));
+}
+
 export function clearGame(): void {
   localStorage.removeItem(STORAGE_KEY);
   localStorage.removeItem(STORAGE_VISITS);
   localStorage.removeItem(STORAGE_ROLLS);
+  localStorage.removeItem(STORAGE_REFLECTIONS);
 }
 
 // --- Game Lifecycle ---
@@ -112,6 +159,7 @@ export function createGame(initialQuery: string): GameState {
   saveGame(game);
   saveVisits([]);
   saveRolls([]);
+  saveReflections([]);
   return game;
 }
 
@@ -157,11 +205,14 @@ export function rollBirthDice(): RollResult {
       cellId: 1,
       source: 'birth',
       startedAt: now(),
-      unlockAt: addHours(now(), 24),
+      unlockAt: addHours(now(), CELL_EXPERIENCE_HOURS),
       completedAt: null,
       status: 'active',
       visitMode: 'introduction',
       gameVisitCount: 1,
+      actionAcceptedAt: null,
+      actionCompletedAt: null,
+      notificationSentAt: null,
     };
     saveVisits([visit]);
 
@@ -221,7 +272,7 @@ export function rollDice(): RollResult {
     rolls.push(roll);
     saveRolls(rolls);
 
-    game.nextRollAt = addHours(now(), 24);
+    game.nextRollAt = addHours(now(), CELL_EXPERIENCE_HOURS);
     game.holdingReason = 'no_move';
     game.status = 'waiting_roll';
     saveGame(game);
@@ -265,11 +316,14 @@ export function rollDice(): RollResult {
     cellId: candidate,
     source: isBonus ? 'bonus' : 'dice',
     startedAt: now(),
-    unlockAt: addHours(now(), 24),
+    unlockAt: addHours(now(), CELL_EXPERIENCE_HOURS),
     completedAt: null,
     status: 'active',
     visitMode,
     gameVisitCount: cellVisits.length + 1,
+    actionAcceptedAt: null,
+    actionCompletedAt: null,
+    notificationSentAt: null,
   };
   visits.push(visit);
   saveVisits(visits);
@@ -290,11 +344,84 @@ export function rollDice(): RollResult {
   };
 }
 
-// --- Visit Completion ---
+// --- Visit Experience ---
 
-export function completeVisit(visitId: string): { success: boolean; transition?: { type: 'support' | 'breakdown'; from: number; to: number }; message: string } {
+export function getVisitReflections(visitId: string): ReflectionRecord[] {
+  return getReflections().filter((reflection) => reflection.visitId === visitId);
+}
+
+export function beginVisitExperience(
+  visitId: string,
+  questionId: string,
+  questionText: string,
+  challengeText: string,
+  answerText: string,
+): VisitRecord {
   const game = getGame();
   if (!game) throw new Error('No active game');
+
+  const answer = answerText.trim();
+  if (!answer) throw new Error('Initial reflection is required');
+
+  const visits = getVisits();
+  const visit = visits.find((item) => item.visitId === visitId);
+  if (!visit) throw new Error('Visit not found');
+  if (visit.completedAt) throw new Error('Visit already completed');
+  if (visit.actionAcceptedAt) throw new Error('Visit experience already started');
+
+  const reflections = getReflections();
+  const duplicate = reflections.some(
+    (reflection) => reflection.visitId === visitId && reflection.phase === 'initial',
+  );
+  if (duplicate) throw new Error('Initial reflection already exists');
+
+  const acceptedAt = now();
+  reflections.push({
+    reflectionId: generateId(),
+    gameId: game.gameId,
+    visitId,
+    cellId: visit.cellId,
+    questionId,
+    questionText,
+    challengeText,
+    phase: 'initial',
+    contentVersion: CELLS.find(c => c.id === visit.cellId)?.contentVersion,
+    answerText: answer,
+    createdAt: acceptedAt,
+    lockedAt: acceptedAt,
+  });
+  saveReflections(reflections);
+
+  visit.actionAcceptedAt = acceptedAt;
+  visit.unlockAt = addHours(acceptedAt, CELL_EXPERIENCE_HOURS);
+  visit.status = 'active';
+  saveVisits(visits);
+
+  return visit;
+}
+
+export function getInitialReflection(visitId: string): ReflectionRecord | null {
+  return getVisitReflections(visitId).find((reflection) => reflection.phase === 'initial') ?? null;
+}
+
+export function getFinalReflection(visitId: string): ReflectionRecord | null {
+  return getVisitReflections(visitId).find((reflection) => reflection.phase === 'final') ?? null;
+}
+
+// --- Visit Completion ---
+
+export function completeVisit(
+  visitId: string,
+  questionId: string,
+  questionText: string,
+  challengeText: string,
+  finalAnswerText: string,
+): { success: boolean; transition?: { type: 'support' | 'breakdown'; from: number; to: number }; message: string } {
+  const game = getGame();
+  if (!game) throw new Error('No active game');
+
+  const finalAnswer = finalAnswerText.trim();
+  if (!finalAnswer) throw new Error('Final reflection is required');
 
   const visits = getVisits();
   const visit = visits.find(v => v.visitId === visitId);
@@ -302,13 +429,39 @@ export function completeVisit(visitId: string): { success: boolean; transition?:
   if (visit.status !== 'active' && visit.status !== 'eligible') {
     throw new Error('Visit not completable');
   }
+  if (!visit.actionAcceptedAt || !getInitialReflection(visitId)) {
+    throw new Error('Initial reflection is required');
+  }
 
   const nowStr = now();
   if (new Date(nowStr) < new Date(visit.unlockAt)) {
-    throw new Error('24 hours not passed');
+    throw new Error(`${CELL_EXPERIENCE_HOURS} hours not passed`);
   }
 
+  const reflections = getReflections();
+  const duplicate = reflections.some(
+    (reflection) => reflection.visitId === visitId && reflection.phase === 'final',
+  );
+  if (duplicate) throw new Error('Final reflection already exists');
+
+  reflections.push({
+    reflectionId: generateId(),
+    gameId: game.gameId,
+    visitId,
+    cellId: visit.cellId,
+    questionId,
+    questionText,
+    challengeText,
+    phase: 'final',
+    contentVersion: getInitialReflection(visitId)?.contentVersion ?? CELLS.find(c => c.id === visit.cellId)?.contentVersion,
+    answerText: finalAnswer,
+    createdAt: nowStr,
+    lockedAt: nowStr,
+  });
+  saveReflections(reflections);
+
   visit.status = 'completed';
+  visit.actionCompletedAt = nowStr;
   visit.completedAt = nowStr;
   saveVisits(visits);
 
@@ -375,11 +528,14 @@ export function acceptTransition(fromCellId: number): void {
     cellId: targetCellId,
     source: cell.transitionType === 'support' ? 'support' : 'breakdown',
     startedAt: now(),
-    unlockAt: addHours(now(), 24),
+    unlockAt: addHours(now(), CELL_EXPERIENCE_HOURS),
     completedAt: null,
     status: 'active',
     visitMode,
     gameVisitCount: cellVisits.length + 1,
+    actionAcceptedAt: null,
+    actionCompletedAt: null,
+    notificationSentAt: null,
   };
   visits.push(visit);
   saveVisits(visits);
