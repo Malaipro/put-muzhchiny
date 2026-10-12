@@ -1,89 +1,89 @@
-import { useEffect, useCallback } from 'react';
-
-// Telegram WebApp types
-declare global {
-  interface Window {
-    Telegram?: {
-      WebApp: {
-        initData: string;
-        initDataUnsafe: {
-          user?: {
-            id: number;
-            first_name: string;
-            last_name?: string;
-            username?: string;
-            language_code?: string;
-          };
-          start_param?: string;
-        };
-        ready?: () => void;
-        expand?: () => void;
-        close?: () => void;
-        enableClosingConfirmation?: () => void;
-        disableClosingConfirmation?: () => void;
-        setHeaderColor?: (color: string) => void;
-        setBackgroundColor?: (color: string) => void;
-        setBottomBarColor?: (color: string) => void;
-        HapticFeedback?: {
-          impactOccurred: (style: 'light' | 'medium' | 'heavy' | 'rigid' | 'soft') => void;
-          notificationOccurred: (type: 'error' | 'success' | 'warning') => void;
-          selectionChanged: () => void;
-        };
-        isExpanded: boolean;
-        viewportHeight: number;
-        viewportStableHeight: number;
-        platform: string;
-        colorScheme: 'light' | 'dark';
-      };
-    };
-  }
-}
+import { useEffect, useCallback, useState } from 'react';
+import {
+  hasTelegramLaunchContext,
+  loadTelegramSdk,
+  signalTelegramReadyFallback,
+} from '../lib/telegramSdk';
 
 export function useTelegram() {
-  const tg = typeof window !== 'undefined' ? window.Telegram?.WebApp : null;
-  // The SDK also creates WebApp in an ordinary browser. Non-empty initData is
-  // the reliable client-side signal that Telegram actually launched the app.
-  const isInTelegram = Boolean(tg?.initData);
+  const [tg, setTg] = useState(() => window.Telegram?.WebApp ?? null);
+  const launchContext = hasTelegramLaunchContext();
+  const isInTelegram = Boolean(tg?.initData || launchContext);
+
+  useEffect(() => {
+    let active = true;
+
+    if (launchContext) signalTelegramReadyFallback();
+
+    void loadTelegramSdk().then((webApp) => {
+      if (active && webApp) setTg(webApp);
+    });
+
+    return () => {
+      active = false;
+    };
+  }, [launchContext]);
 
   useEffect(() => {
     if (!tg || !isInTelegram) return;
 
-    // Set KEMP colors
-    tg.setHeaderColor?.('#111310');
-    tg.setBackgroundColor?.('#111310');
-    tg.setBottomBarColor?.('#111310');
+    const safeCall = (callback: (() => void) | undefined) => {
+      try {
+        callback?.();
+      } catch {
+        // Older Telegram clients may expose methods they cannot execute.
+      }
+    };
 
-    // Expand to full height
-    tg.expand?.();
-
-    // Enable closing confirmation to prevent accidental exit during gameplay
-    tg.enableClosingConfirmation?.();
-
-    // Tell Telegram we're ready
-    tg.ready?.();
+    safeCall(() => tg.setHeaderColor?.('#111310'));
+    safeCall(() => tg.setBackgroundColor?.('#111310'));
+    safeCall(() => tg.setBottomBarColor?.('#111310'));
+    safeCall(() => tg.expand?.());
+    safeCall(() => tg.enableClosingConfirmation?.());
+    safeCall(() => tg.ready?.());
   }, [isInTelegram, tg]);
 
   const hapticImpact = useCallback(
     (style: 'light' | 'medium' | 'heavy' | 'rigid' | 'soft' = 'medium') => {
-      if (isInTelegram) tg?.HapticFeedback?.impactOccurred(style);
+      try {
+        if (isInTelegram) tg?.HapticFeedback?.impactOccurred(style);
+      } catch {
+        // Haptics are optional and must never interrupt gameplay.
+      }
     },
     [isInTelegram, tg]
   );
 
   const hapticSuccess = useCallback(() => {
-    if (isInTelegram) tg?.HapticFeedback?.notificationOccurred('success');
+    try {
+      if (isInTelegram) tg?.HapticFeedback?.notificationOccurred('success');
+    } catch {
+      // Haptics are optional and must never interrupt gameplay.
+    }
   }, [isInTelegram, tg]);
 
   const hapticError = useCallback(() => {
-    if (isInTelegram) tg?.HapticFeedback?.notificationOccurred('error');
+    try {
+      if (isInTelegram) tg?.HapticFeedback?.notificationOccurred('error');
+    } catch {
+      // Haptics are optional and must never interrupt gameplay.
+    }
   }, [isInTelegram, tg]);
 
   const hapticWarning = useCallback(() => {
-    if (isInTelegram) tg?.HapticFeedback?.notificationOccurred('warning');
+    try {
+      if (isInTelegram) tg?.HapticFeedback?.notificationOccurred('warning');
+    } catch {
+      // Haptics are optional and must never interrupt gameplay.
+    }
   }, [isInTelegram, tg]);
 
   const closeApp = useCallback(() => {
-    if (isInTelegram) tg?.close?.();
+    try {
+      if (isInTelegram) tg?.close?.();
+    } catch {
+      // Closing through Telegram is optional.
+    }
   }, [isInTelegram, tg]);
 
   return {
