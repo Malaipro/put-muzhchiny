@@ -16,6 +16,7 @@
       #boot-status {
         box-sizing: border-box;
         display: grid;
+        min-height: 100vh;
         min-height: 100dvh;
         place-items: center;
         padding: 32px;
@@ -23,11 +24,64 @@
         text-align: center;
       }
     </style>
-    
-    <!-- Fonts: Manrope + Cinzel -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+    <!--
+      This watchdog is deliberately plain ES5. It must still explain a failed
+      startup when the application bundle cannot be parsed or downloaded.
+    -->
+    <script>
+      (function () {
+        var failureCode = 'START-0';
+
+        window.addEventListener('error', function (event) {
+          failureCode = event && event.target && event.target !== window
+            ? 'START-1'
+            : 'START-2';
+        }, true);
+
+        window.addEventListener('unhandledrejection', function () {
+          failureCode = 'START-3';
+        });
+
+        window.setTimeout(function () {
+          var status = document.getElementById('boot-status');
+          if (!status) return;
+
+          status.textContent = '';
+
+          var message = document.createElement('div');
+          var title = document.createElement('p');
+          var detail = document.createElement('p');
+          var retry = document.createElement('button');
+
+          title.textContent = 'Игра не смогла запуститься';
+          title.style.margin = '0 0 12px';
+          title.style.fontSize = '20px';
+
+          detail.textContent = 'Код: ' + failureCode + '. Закрой и снова открой мини-приложение.';
+          detail.style.margin = '0 0 20px';
+          detail.style.color = '#918f86';
+
+          retry.type = 'button';
+          retry.textContent = 'Повторить';
+          retry.style.minHeight = '44px';
+          retry.style.padding = '10px 24px';
+          retry.style.border = '1px solid #b58a4a';
+          retry.style.borderRadius = '12px';
+          retry.style.background = '#20231e';
+          retry.style.color = '#e8e1d3';
+          retry.style.font = '600 16px/1.4 system-ui, sans-serif';
+          retry.addEventListener('click', function () {
+            window.location.reload();
+          });
+
+          message.appendChild(title);
+          message.appendChild(detail);
+          message.appendChild(retry);
+          status.appendChild(message);
+        }, 12000);
+      }());
+    </script>
   </head>
   <body>
     <div id="root">

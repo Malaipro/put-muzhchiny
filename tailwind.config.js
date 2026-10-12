@@ -17,8 +17,8 @@ export default {
         muted: '#918F86',
       },
       fontFamily: {
-        heading: ['Cinzel', 'serif'],
-        body: ['Manrope', 'system-ui', 'sans-serif'],
+        heading: ['Cinzel', 'Georgia', 'Times New Roman', 'serif'],
+        body: ['Manrope', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'system-ui', 'sans-serif'],
       },
       fontSize: {
         display: ['36px', { lineHeight: '1.1', fontWeight: '500' }],
