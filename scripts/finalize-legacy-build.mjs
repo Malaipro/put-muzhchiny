@@ -84,7 +84,7 @@ async function finalizeBundle(sourceName) {
   await writeFile(finalPath, content, 'utf8')
   if (finalPath !== sourcePath) await unlink(sourcePath)
 
-  return { finalName, sourceName }
+  return { content, finalName, sourceName }
 }
 
 const finalizedBundles = []
@@ -100,9 +100,9 @@ for (const { finalName, sourceName } of finalizedBundles) {
   html = html.replaceAll(sourceName, finalName)
 }
 
-// Telegram iOS did not finish the external polyfill bundle before executing
-// the generated System.import call. Keep the tiny official SystemJS loader
-// inline and before all generated legacy scripts so `System` always exists.
+// Keep the complete compatibility bootstrap inside the document. Telegram
+// iOS can otherwise fail the separate polyfill request during a deployment
+// switch even though the document itself already came from the new release.
 const systemJsSource = await readFile(systemJsPath, 'utf8')
 parse(systemJsSource, { ecmaVersion: 5, sourceType: 'script' })
 
@@ -110,14 +110,23 @@ if (/<\/script/i.test(systemJsSource)) {
   throw new Error('SystemJS loader cannot be safely embedded in HTML')
 }
 
-const polyfillTag = '<script crossorigin id="vite-legacy-polyfill"'
+const polyfillBundle = finalizedBundles.find(({ sourceName }) => sourceName.startsWith('polyfills-legacy-'))
+if (!polyfillBundle) {
+  throw new Error('Could not find the finalized legacy polyfill bundle')
+}
+
+if (/<\/script/i.test(polyfillBundle.content)) {
+  throw new Error('Legacy polyfill bundle cannot be safely embedded in HTML')
+}
+
+const polyfillTag = `<script crossorigin id="vite-legacy-polyfill" src="/assets/${polyfillBundle.finalName}"></script>`
 if (!html.includes(polyfillTag)) {
   throw new Error('Could not find the generated legacy polyfill tag')
 }
 
 html = html.replace(
   polyfillTag,
-  `<script id="telegram-systemjs-loader">${systemJsSource}</script>\n    ${polyfillTag}`,
+  () => `<script id="telegram-systemjs-loader">${systemJsSource}</script>\n    <script id="vite-legacy-polyfill">${polyfillBundle.content}</script>`,
 )
 
 await writeFile(htmlPath, html, 'utf8')
