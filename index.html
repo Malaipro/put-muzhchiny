@@ -34,6 +34,14 @@
         var failureCode = 'START-0';
         var failureDetail = '';
 
+        function recordFailure(code, detail) {
+          // Preserve the first failure: later errors are often consequences
+          // and would hide the actual startup cause.
+          if (failureCode !== 'START-0') return;
+          failureCode = code;
+          failureDetail = compactDetail(detail);
+        }
+
         function compactDetail(value) {
           if (!value) return '';
           return String(value).replace(/\s+/g, ' ').slice(0, 140);
@@ -41,18 +49,17 @@
 
         function fileName(value) {
           if (!value) return '';
-          return String(value).split('/').pop().split('?')[0];
+          return String(value).split('#')[0].split('?')[0].split('/').pop();
         }
 
         window.addEventListener('error', function (event) {
           if (event && event.target && event.target !== window) {
-            failureCode = 'START-1';
-            failureDetail = fileName(event.target.src || event.target.href);
+            recordFailure('START-1', fileName(event.target.src || event.target.href));
             return;
           }
 
-          failureCode = 'START-2';
-          failureDetail = compactDetail(
+          recordFailure(
+            'START-2',
             (event && event.message ? event.message : '')
               + (event && event.filename ? ' · ' + fileName(event.filename) : '')
               + (event && event.lineno ? ':' + event.lineno : '')
@@ -60,8 +67,8 @@
         }, true);
 
         window.addEventListener('unhandledrejection', function (event) {
-          failureCode = 'START-3';
-          failureDetail = compactDetail(
+          recordFailure(
+            'START-3',
             event && event.reason
               ? (event.reason.message || event.reason.name || event.reason)
               : ''
@@ -88,6 +95,7 @@
             + '. Закрой и снова открой мини-приложение.';
           detail.style.margin = '0 0 20px';
           detail.style.color = '#918f86';
+          detail.style.wordBreak = 'break-word';
 
           retry.type = 'button';
           retry.textContent = 'Повторить';

@@ -11,6 +11,7 @@ const projectRoot = dirname(dirname(fileURLToPath(import.meta.url)))
 const distDir = join(projectRoot, 'dist')
 const assetsDir = join(distDir, 'assets')
 const htmlPath = join(distDir, 'index.html')
+const systemJsPath = join(projectRoot, 'node_modules', 'systemjs', 'dist', 's.min.js')
 
 const assetNames = await readdir(assetsDir)
 const legacyNames = assetNames.filter((name) => /^[\w-]+-legacy-[\w-]+\.js$/.test(name))
@@ -98,6 +99,26 @@ for (const { finalName, sourceName } of finalizedBundles) {
   }
   html = html.replaceAll(sourceName, finalName)
 }
+
+// Telegram iOS did not finish the external polyfill bundle before executing
+// the generated System.import call. Keep the tiny official SystemJS loader
+// inline and before all generated legacy scripts so `System` always exists.
+const systemJsSource = await readFile(systemJsPath, 'utf8')
+parse(systemJsSource, { ecmaVersion: 5, sourceType: 'script' })
+
+if (/<\/script/i.test(systemJsSource)) {
+  throw new Error('SystemJS loader cannot be safely embedded in HTML')
+}
+
+const polyfillTag = '<script crossorigin id="vite-legacy-polyfill"'
+if (!html.includes(polyfillTag)) {
+  throw new Error('Could not find the generated legacy polyfill tag')
+}
+
+html = html.replace(
+  polyfillTag,
+  `<script id="telegram-systemjs-loader">${systemJsSource}</script>\n    ${polyfillTag}`,
+)
 
 await writeFile(htmlPath, html, 'utf8')
 

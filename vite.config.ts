@@ -12,6 +12,7 @@ export default defineConfig({
       // target so both bootstrap and application contain no ES2015 syntax
       // before React gets a chance to mount.
       targets: ['IE 11'],
+      externalSystemJS: true,
       renderModernChunks: false,
     }),
   ],
