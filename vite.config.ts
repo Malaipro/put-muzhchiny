@@ -7,7 +7,11 @@ export default defineConfig({
   plugins: [
     react(),
     legacy({
-      targets: ['iOS >= 12', 'Safari >= 12'],
+      // Telegram's iOS WebView can expose an older JavaScript runtime than
+      // the surrounding Safari version. IE 11 is used here as an ES5 build
+      // target so both bootstrap and application contain no ES2015 syntax
+      // before React gets a chance to mount.
+      targets: ['IE 11'],
       renderModernChunks: false,
     }),
   ],

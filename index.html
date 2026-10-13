@@ -32,15 +32,40 @@
     <script>
       (function () {
         var failureCode = 'START-0';
+        var failureDetail = '';
+
+        function compactDetail(value) {
+          if (!value) return '';
+          return String(value).replace(/\s+/g, ' ').slice(0, 140);
+        }
+
+        function fileName(value) {
+          if (!value) return '';
+          return String(value).split('/').pop().split('?')[0];
+        }
 
         window.addEventListener('error', function (event) {
-          failureCode = event && event.target && event.target !== window
-            ? 'START-1'
-            : 'START-2';
+          if (event && event.target && event.target !== window) {
+            failureCode = 'START-1';
+            failureDetail = fileName(event.target.src || event.target.href);
+            return;
+          }
+
+          failureCode = 'START-2';
+          failureDetail = compactDetail(
+            (event && event.message ? event.message : '')
+              + (event && event.filename ? ' · ' + fileName(event.filename) : '')
+              + (event && event.lineno ? ':' + event.lineno : '')
+          );
         }, true);
 
-        window.addEventListener('unhandledrejection', function () {
+        window.addEventListener('unhandledrejection', function (event) {
           failureCode = 'START-3';
+          failureDetail = compactDetail(
+            event && event.reason
+              ? (event.reason.message || event.reason.name || event.reason)
+              : ''
+          );
         });
 
         window.setTimeout(function () {
@@ -58,7 +83,9 @@
           title.style.margin = '0 0 12px';
           title.style.fontSize = '20px';
 
-          detail.textContent = 'Код: ' + failureCode + '. Закрой и снова открой мини-приложение.';
+          detail.textContent = 'Код: ' + failureCode
+            + (failureDetail ? ' · ' + failureDetail : '')
+            + '. Закрой и снова открой мини-приложение.';
           detail.style.margin = '0 0 20px';
           detail.style.color = '#918f86';
 
