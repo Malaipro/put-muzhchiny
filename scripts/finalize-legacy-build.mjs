@@ -12,6 +12,8 @@ const distDir = join(projectRoot, 'dist')
 const assetsDir = join(distDir, 'assets')
 const htmlPath = join(distDir, 'index.html')
 const systemJsPath = join(projectRoot, 'node_modules', 'systemjs', 'dist', 's.min.js')
+const namedRegisterPath = join(projectRoot, 'node_modules', 'systemjs', 'dist', 'extras', 'named-register.min.js')
+const appModuleId = 'kemp-app'
 
 const assetNames = await readdir(assetsDir)
 const legacyNames = assetNames.filter((name) => /^[\w-]+-legacy-[\w-]+\.js$/.test(name))
@@ -115,8 +117,38 @@ if (!polyfillBundle) {
   throw new Error('Could not find the finalized legacy polyfill bundle')
 }
 
+const appBundle = finalizedBundles.find(({ sourceName }) => sourceName.startsWith('index-legacy-'))
+if (!appBundle) {
+  throw new Error('Could not find the finalized legacy application bundle')
+}
+
 if (/<\/script/i.test(polyfillBundle.content)) {
   throw new Error('Legacy polyfill bundle cannot be safely embedded in HTML')
+}
+
+const namedRegisterSource = await readFile(namedRegisterPath, 'utf8')
+parse(namedRegisterSource, { ecmaVersion: 5, sourceType: 'script' })
+
+if (/<\/script/i.test(namedRegisterSource)) {
+  throw new Error('SystemJS named-register extension cannot be safely embedded in HTML')
+}
+
+const anonymousRegisterCall = 'System.register(['
+if (
+  !appBundle.content.includes(anonymousRegisterCall)
+  || appBundle.content.indexOf(anonymousRegisterCall) !== appBundle.content.lastIndexOf(anonymousRegisterCall)
+) {
+  throw new Error('Expected exactly one anonymous System.register application module')
+}
+
+const namedAppSource = appBundle.content.replace(
+  anonymousRegisterCall,
+  `System.register("${appModuleId}",[`,
+)
+parse(namedAppSource, { ecmaVersion: 5, sourceType: 'script' })
+
+if (/<\/script/i.test(namedAppSource)) {
+  throw new Error('Legacy application bundle cannot be safely embedded in HTML')
 }
 
 const polyfillTag = `<script crossorigin id="vite-legacy-polyfill" src="/assets/${polyfillBundle.finalName}"></script>`
@@ -127,6 +159,16 @@ if (!html.includes(polyfillTag)) {
 html = html.replace(
   polyfillTag,
   () => `<script id="telegram-systemjs-loader">${systemJsSource}</script>\n    <script id="vite-legacy-polyfill">${polyfillBundle.content}</script>`,
+)
+
+const entryTag = `<script crossorigin id="vite-legacy-entry" data-src="/assets/${appBundle.finalName}">System.import(document.getElementById('vite-legacy-entry').getAttribute('data-src'))</script>`
+if (!html.includes(entryTag)) {
+  throw new Error('Could not find the generated legacy application tag')
+}
+
+html = html.replace(
+  entryTag,
+  () => `<script id="telegram-systemjs-named-register">${namedRegisterSource}</script>\n    <script id="vite-legacy-entry">${namedAppSource}</script>\n    <script id="telegram-app-start">System.import("${appModuleId}")</script>`,
 )
 
 await writeFile(htmlPath, html, 'utf8')
