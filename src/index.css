@@ -115,7 +115,7 @@
     border-radius: 13px;
     background:
       linear-gradient(180deg, rgba(255, 222, 163, 0.09), rgba(25, 11, 5, 0.26)),
-      url('/runtime/onboarding/cta_wood_texture.png') center / cover no-repeat;
+      url('/runtime/onboarding/cta_wood_texture.png?asset=2026-10-15-v1') center / cover no-repeat;
     box-shadow:
       0 14px 25px rgba(0, 0, 0, 0.55),
       0 3px 0 #4d2d1a,
@@ -156,7 +156,7 @@
     background:
       radial-gradient(ellipse 90% 48% at 50% 38%, rgba(181, 138, 74, 0.075), transparent 70%),
       linear-gradient(180deg, rgba(4, 5, 4, 0.38), rgba(4, 5, 4, 0.74)),
-      url('/textures/base_graphite_topography_400.png') center / 400px 400px repeat;
+      url('/textures/base_graphite_topography_400.png?asset=2026-10-15-v1') center / 400px 400px repeat;
   }
 
   .gameplay-eyebrow {
@@ -350,63 +350,96 @@
 
   .dice-3d-scene {
     position: relative;
-    perspective: 920px;
-    filter: drop-shadow(0 28px 23px rgba(0, 0, 0, 0.62));
+    isolation: isolate;
+  }
+
+  .dice-3d-scene::after {
+    position: absolute;
+    z-index: 0;
+    right: 13%;
+    bottom: -11%;
+    left: 13%;
+    height: 18%;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.58);
+    content: '';
+    filter: blur(16px);
+    pointer-events: none;
   }
 
   .dice-3d-cube {
     position: absolute;
+    z-index: 1;
     inset: 0;
-    transform-style: preserve-3d;
+    transform-origin: center center;
     will-change: transform;
     transition: transform 140ms ease;
   }
 
   .dice-3d-face {
     position: absolute;
-    inset: 0;
-    overflow: hidden;
-    backface-visibility: hidden;
-    transform-style: preserve-3d;
-  }
-
-  .dice-3d-face img {
-    width: 112%;
-    height: 112%;
     max-width: none;
-    margin: -6%;
-    object-fit: contain;
+    object-fit: fill;
+    transform-origin: 0 0;
     user-select: none;
   }
 
-  @keyframes cube-true-3d-roll {
+  .dice-3d-face.is-top {
+    z-index: 3;
+    top: 6%;
+    left: 26%;
+    width: 48%;
+    height: 48%;
+    transform: scaleY(.58) rotate(45deg);
+    transform-origin: center center;
+  }
+
+  .dice-3d-face.is-left {
+    z-index: 2;
+    top: 30%;
+    left: 16%;
+    width: 34%;
+    height: 36%;
+    transform: skewY(30deg);
+  }
+
+  .dice-3d-face.is-right {
+    z-index: 2;
+    top: 49.6%;
+    left: 50%;
+    width: 34%;
+    height: 36%;
+    transform: skewY(-30deg);
+  }
+
+  @keyframes cube-isometric-roll {
     0% {
-      transform: translate3d(0, 0, 0) rotateX(-18deg) rotateY(32deg) rotateZ(-2deg);
+      transform: translateY(0) rotate(0) scale(1);
       animation-timing-function: cubic-bezier(.32, .02, .68, .26);
     }
     22% {
-      transform: translate3d(0, -42px, 18px) rotateX(154deg) rotateY(218deg) rotateZ(72deg) scale3d(.96, .96, .96);
+      transform: translateY(-42px) rotate(112deg) scale(.94);
     }
     48% {
-      transform: translate3d(0, -17px, 8px) rotateX(382deg) rotateY(451deg) rotateZ(198deg) scale3d(1.02, 1.02, 1.02);
+      transform: translateY(-17px) rotate(292deg) scale(1.02);
       animation-timing-function: cubic-bezier(.16, .72, .28, 1);
     }
     72% {
-      transform: translate3d(0, -29px, 6px) rotateX(568deg) rotateY(623deg) rotateZ(298deg) scale3d(.985, .985, .985);
+      transform: translateY(-29px) rotate(478deg) scale(.985);
     }
     88% {
-      transform: translate3d(0, 6px, 0) rotateX(690deg) rotateY(731deg) rotateZ(353deg);
+      transform: translateY(6px) rotate(680deg);
     }
     94% {
-      transform: translate3d(0, -5px, 0) rotateX(698deg) rotateY(744deg) rotateZ(358deg);
+      transform: translateY(-5px) rotate(708deg);
     }
     100% {
-      transform: translate3d(0, 0, 0) rotateX(702deg) rotateY(752deg) rotateZ(358deg);
+      transform: translateY(0) rotate(720deg);
     }
   }
 
   .dice-3d-cube.is-rolling {
-    animation: cube-true-3d-roll 1.4s both;
+    animation: cube-isometric-roll 1.4s both;
   }
 
   @media (prefers-reduced-motion: reduce) {

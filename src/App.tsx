@@ -26,7 +26,7 @@ import { BottomNav, type NavSection } from './components/BottomNav';
 import { PassportScreen } from './components/PassportScreen';
 import { SectionPlaceholder } from './components/SectionPlaceholder';
 import { ReflectionsScreen } from './components/ReflectionsScreen';
-import { isPlaytest } from './lib/playtest';
+import { useV005Design } from './lib/playtest';
 import { DesignedBoard } from './components/DesignedBoard';
 import './playtest.css';
 
@@ -147,7 +147,7 @@ function App() {
 
   if (!game) {
     return (
-      <div className={`${isPlaytest ? 'playtest' : ''} min-h-dvh bg-ink text-bone`}>
+      <div className={`${useV005Design ? 'v005-design' : ''} min-h-dvh bg-ink text-bone`}>
         <Onboarding onStart={handleCreateGame} />
       </div>
     );
@@ -157,11 +157,11 @@ function App() {
   const currentCell = game.currentCellId > 0 ? getCellById(game.currentCellId) : null;
 
   return (
-    <div className={`${isPlaytest ? 'playtest' : ''} min-h-dvh bg-ink text-bone flex flex-col`}>
+    <div className={`${useV005Design ? 'v005-design' : ''} min-h-dvh bg-ink text-bone flex flex-col`}>
       <main className="flex-1 overflow-y-auto pb-[calc(72px+env(safe-area-inset-bottom))]">
         {screen === 'map' && (
           <div className="px-safe">
-            {isPlaytest ? <DesignedBoard game={game} currentVisit={currentVisit} onRoll={() => setScreen('dice')} onOpenCell={() => {
+            {useV005Design ? <DesignedBoard game={game} currentVisit={currentVisit} onRoll={() => setScreen('dice')} onOpenCell={() => {
               if (game.status === 'transition_pending' && currentCell?.transitionTarget) {
                 setTransition({ type: currentCell.transitionType as 'support' | 'breakdown', from: currentCell.id, to: currentCell.transitionTarget });
                 setScreen('transition');

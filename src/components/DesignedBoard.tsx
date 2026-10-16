@@ -1,6 +1,8 @@
 import { useEffect, useRef } from 'react';
 import { canRoll, getVisits, type GameState, type VisitRecord } from '../lib/game';
 import { getCellById } from '../lib/cells';
+import { getPublicUrl } from '../lib/assets';
+import { isPlaytest } from '../lib/playtest';
 
 export function DesignedBoard({game, currentVisit, onRoll, onOpenCell}: {game: GameState; currentVisit: VisitRecord | null; onRoll: () => void; onOpenCell: () => void}) {
   const current = useRef<HTMLSpanElement>(null);
@@ -15,12 +17,12 @@ export function DesignedBoard({game, currentVisit, onRoll, onOpenCell}: {game: G
       {rows.map((row,r) => <div className={`route-row ${r%2 ? 'reverse':''}`} key={r}>{row.map(id => {
         const info = getCellById(id);
         const state = id===game.currentCellId ? 'current' : visits.some(v=>v.cellId===id && v.completedAt) ? 'lived' : info?.transitionType==='support' ? 'support' : info?.transitionType==='breakdown' ? 'breakdown' : 'normal';
-        return <span ref={id===game.currentCellId ? current : undefined} key={id} data-cell-id={id} aria-current={id===game.currentCellId ? 'step':undefined} className="route-cell" style={{backgroundImage:`url(/v005/cells/cell_${state}.png)`}}>{id}</span>;
+        return <span ref={id===game.currentCellId ? current : undefined} key={id} data-cell-id={id} aria-current={id===game.currentCellId ? 'step':undefined} className="route-cell" style={{backgroundImage:`url(${getPublicUrl(`/v005/cells/cell_${state}.png`)})`}}>{id}</span>;
       })}</div>)}
     </div>
     <footer className="board-footer"><div className="board-status"><p>Клетка {game.currentCellId || '—'} · {ready ? 'Путь открыт':'Текущая'}</p><h2>{cell?.kempName || 'Начало пути'}</h2><p>{game.status==='transition_pending' ? 'Подтверди переход после завершённой клетки.' : ready ? 'Можно бросать кубик.' : currentVisit?.actionAcceptedAt ? 'Выполни действие и сохрани итог.' : 'Открой клетку и выбери действие.'}</p></div>
       <button className="gameplay-primary-button" onClick={ready ? onRoll : onOpenCell}>{ready ? 'Бросить кубик' : game.status==='transition_pending' ? 'Открыть переход' : currentVisit?.actionAcceptedAt ? 'Записать итог' : 'Открыть клетку'}</button>
-      <p className="playtest-note">Проба · без ожидания · тексты карты уточняются</p>
+      {isPlaytest && <p className="playtest-note">Проба · без ожидания · тексты карты уточняются</p>}
     </footer>
   </section>;
 }

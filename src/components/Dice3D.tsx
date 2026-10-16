@@ -1,4 +1,4 @@
-import type { CSSProperties } from 'react';
+import { useEffect, useState, type CSSProperties } from 'react';
 
 import { getPublicUrl } from '../lib/assets';
 
@@ -9,9 +9,9 @@ interface Dice3DProps {
   size?: number;
 }
 
-// Texture values for the cube's logical positions:
-// front, right, left, top, bottom, back.
-// Each row is a valid physical orientation with the requested value on top.
+// Texture values for the cube's logical positions: front, right, left, top,
+// bottom, back. The visible isometric composition uses top, left and front.
+// Each row remains a valid physical orientation with the requested value on top.
 const faceLayoutByTopValue: Record<number, number[]> = {
   1: [2, 4, 3, 1, 6, 5],
   2: [6, 4, 3, 2, 5, 1],
@@ -21,26 +21,29 @@ const faceLayoutByTopValue: Record<number, number[]> = {
   6: [5, 4, 3, 6, 1, 2],
 };
 
-const rollingFaceLayout = faceLayoutByTopValue[1];
-
-const presentationRotation = 'rotateX(-18deg) rotateY(32deg) rotateZ(-2deg)';
-
 export function Dice3D({ value, isRolling, isPressed, size = 230 }: Dice3DProps) {
-  const half = size / 2;
-  const faceLayout = value ? faceLayoutByTopValue[value] ?? rollingFaceLayout : rollingFaceLayout;
-  const cubeStyle = {
-    '--dice-half': `${half}px`,
-    transform: isRolling ? undefined : `${presentationRotation} ${isPressed ? 'scale3d(.96,.96,.96)' : ''}`,
-  } as CSSProperties;
+  const [rollingValue, setRollingValue] = useState(1);
 
-  const transforms = [
-    `translateZ(${half}px)`,
-    `rotateY(90deg) translateZ(${half}px)`,
-    `rotateY(-90deg) translateZ(${half}px)`,
-    `rotateX(90deg) translateZ(${half}px)`,
-    `rotateX(-90deg) translateZ(${half}px)`,
-    `rotateY(180deg) translateZ(${half}px)`,
+  useEffect(() => {
+    if (!isRolling) return;
+
+    const interval = window.setInterval(() => {
+      setRollingValue((current) => current % 6 + 1);
+    }, 95);
+
+    return () => window.clearInterval(interval);
+  }, [isRolling]);
+
+  const visibleValue = value ?? rollingValue;
+  const faceLayout = faceLayoutByTopValue[visibleValue] ?? faceLayoutByTopValue[1];
+  const visibleFaces = [
+    { className: 'is-top', value: faceLayout[3] },
+    { className: 'is-left', value: faceLayout[2] },
+    { className: 'is-right', value: faceLayout[0] },
   ];
+  const cubeStyle = {
+    transform: !isRolling && isPressed ? 'translateY(3px) scale(.96)' : undefined,
+  } as CSSProperties;
 
   return (
     <div
@@ -50,18 +53,14 @@ export function Dice3D({ value, isRolling, isPressed, size = 230 }: Dice3DProps)
       aria-label={isRolling ? 'Кубик вращается' : value ? `На кубике ${value}` : 'Игровой кубик'}
     >
       <div className={`dice-3d-cube ${isRolling ? 'is-rolling' : ''}`} style={cubeStyle}>
-        {transforms.map((transform, index) => (
-          <div
-            key={index}
-            className="dice-3d-face"
-            style={{ transform }}
-          >
-            <img
-              src={getPublicUrl(`/runtime/cube_B_v001/faces/dice_face_${faceLayout[index]}.png`)}
-              alt=""
-              draggable={false}
-            />
-          </div>
+        {visibleFaces.map((face) => (
+          <img
+            key={face.className}
+            className={`dice-3d-face ${face.className}`}
+            src={getPublicUrl(`/runtime/cube_B_v001/faces/dice_face_${face.value}.png`)}
+            alt=""
+            draggable={false}
+          />
         ))}
       </div>
     </div>

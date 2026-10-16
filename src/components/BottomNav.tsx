@@ -1,5 +1,5 @@
 import { getPublicUrl } from '../lib/assets';
-import { isPlaytest } from '../lib/playtest';
+import { useV005Design } from '../lib/playtest';
 
 export type NavSection = 'path' | 'cells' | 'reflections' | 'profile';
 
@@ -33,7 +33,7 @@ export function BottomNav({ active, onNavigate }: BottomNavProps) {
                 isActive ? 'text-bronze opacity-100' : 'text-muted opacity-55 hover:opacity-80'
               }`}
             >
-              <img src={getPublicUrl(isPlaytest ? `/v005/navigation/nav_${item.id}@2x.png` : item.icon)} alt="" width={24} height={24} aria-hidden="true" />
+              <img src={getPublicUrl(useV005Design ? `/v005/navigation/nav_${item.id}@2x.png` : item.icon)} alt="" width={24} height={24} aria-hidden="true" />
               <span>{item.label}</span>
             </button>
           );
