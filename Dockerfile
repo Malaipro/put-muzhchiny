@@ -4,6 +4,12 @@ FROM node:22-alpine AS builder
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci
+
+# Amvera can reuse a previously built application layer after a repository
+# update. Change this revision for releases that must rebuild the full client.
+ARG APP_BUILD_REVISION=2026-10-19-v005-assets-v2
+RUN echo "$APP_BUILD_REVISION" > /tmp/put-muzhchiny-build-revision
+
 COPY . .
 RUN npm run build
 

@@ -115,7 +115,7 @@
     border-radius: 13px;
     background:
       linear-gradient(180deg, rgba(255, 222, 163, 0.09), rgba(25, 11, 5, 0.26)),
-      url('/runtime/onboarding/cta_wood_texture.png?asset=2026-10-15-v1') center / cover no-repeat;
+      url('/runtime/onboarding/cta_wood_texture.png?asset=2026-10-19-v2') center / cover no-repeat;
     box-shadow:
       0 14px 25px rgba(0, 0, 0, 0.55),
       0 3px 0 #4d2d1a,
@@ -156,7 +156,7 @@
     background:
       radial-gradient(ellipse 90% 48% at 50% 38%, rgba(181, 138, 74, 0.075), transparent 70%),
       linear-gradient(180deg, rgba(4, 5, 4, 0.38), rgba(4, 5, 4, 0.74)),
-      url('/textures/base_graphite_topography_400.png?asset=2026-10-15-v1') center / 400px 400px repeat;
+      url('/textures/base_graphite_topography_400.png?asset=2026-10-19-v2') center / 400px 400px repeat;
   }
 
   .gameplay-eyebrow {
