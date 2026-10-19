@@ -169,6 +169,19 @@ function randomDie(): number {
   return Math.floor(Math.random() * 6) + 1;
 }
 
+/**
+ * Opening the Path should still feel like a roll, without making a new player
+ * repeat the same screen for an arbitrary amount of time. The chance of a six
+ * grows after every failed birth roll and the fourth attempt is guaranteed.
+ */
+function randomBirthDie(previousBirthRolls: number): number {
+  const sixChances = [0.4, 0.6, 0.8, 1];
+  const sixChance = sixChances[Math.min(previousBirthRolls, sixChances.length - 1)];
+
+  if (Math.random() < sixChance) return 6;
+  return Math.floor(Math.random() * 5) + 1;
+}
+
 export interface RollResult {
   dieValue: number;
   resultType: RollResultType;
@@ -184,7 +197,9 @@ export function rollBirthDice(): RollResult {
     throw new Error('Game not in waiting_birth state');
   }
 
-  const dieValue = randomDie();
+  const rolls = getRolls();
+  const previousBirthRolls = rolls.filter((roll) => roll.rollType === 'birth').length;
+  const dieValue = randomBirthDie(previousBirthRolls);
   const roll: RollRecord = {
     rollId: generateId(),
     dieValue,
@@ -195,7 +210,6 @@ export function rollBirthDice(): RollResult {
     createdAt: now(),
   };
 
-  const rolls = getRolls();
   rolls.push(roll);
   saveRolls(rolls);
 

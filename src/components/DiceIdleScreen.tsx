@@ -32,7 +32,7 @@ export function DiceIdleScreen({
         <p className="gameplay-eyebrow">ПУТЬ</p>
         <h1 className="gameplay-title mt-2">Бросок кубика</h1>
         <p className="mt-3 text-sm leading-[1.5] text-muted">
-          {isBirth ? 'Для входа нужна шестёрка. Если выпало другое число, бросай снова.' : 'Коснись кубика или используй кнопку ниже'}
+          {isBirth ? 'Для входа нужна шестёрка. После каждой попытки шанс растёт; четвёртая откроет Путь наверняка.' : 'Коснись кубика или используй кнопку ниже'}
         </p>
       </header>
 

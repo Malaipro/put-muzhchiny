@@ -10,15 +10,15 @@ interface Dice3DProps {
 }
 
 // Texture values for the cube's logical positions: front, right, left, top,
-// bottom, back. The visible isometric composition uses top, left and front.
-// Each row remains a valid physical orientation with the requested value on top.
-const faceLayoutByTopValue: Record<number, number[]> = {
-  1: [2, 4, 3, 1, 6, 5],
-  2: [6, 4, 3, 2, 5, 1],
-  3: [2, 1, 6, 3, 4, 5],
-  4: [2, 6, 1, 4, 3, 5],
-  5: [1, 4, 3, 5, 2, 6],
-  6: [5, 4, 3, 6, 1, 2],
+// bottom, back. Each row is a valid rotation of the same physical die. The
+// requested result is always placed on the large front face, facing the player.
+const faceLayoutByFrontValue: Record<number, number[]> = {
+  1: [1, 4, 3, 5, 2, 6],
+  2: [2, 4, 3, 1, 6, 5],
+  3: [3, 2, 5, 1, 6, 4],
+  4: [4, 5, 2, 1, 6, 3],
+  5: [5, 3, 4, 1, 6, 2],
+  6: [6, 4, 3, 2, 5, 1],
 };
 
 export function Dice3D({ value, isRolling, isPressed, size = 230 }: Dice3DProps) {
@@ -35,7 +35,7 @@ export function Dice3D({ value, isRolling, isPressed, size = 230 }: Dice3DProps)
   }, [isRolling]);
 
   const visibleValue = value ?? rollingValue;
-  const faceLayout = faceLayoutByTopValue[visibleValue] ?? faceLayoutByTopValue[1];
+  const faceLayout = faceLayoutByFrontValue[visibleValue] ?? faceLayoutByFrontValue[1];
   const visibleFaces = [
     { className: 'is-top', value: faceLayout[3] },
     { className: 'is-left', value: faceLayout[2] },
@@ -54,13 +54,17 @@ export function Dice3D({ value, isRolling, isPressed, size = 230 }: Dice3DProps)
     >
       <div className={`dice-3d-cube ${isRolling ? 'is-rolling' : ''}`} style={cubeStyle}>
         {visibleFaces.map((face) => (
-          <img
+          <span
             key={face.className}
             className={`dice-3d-face ${face.className}`}
-            src={getPublicUrl(`/runtime/cube_B_v001/faces/dice_face_${face.value}.png`)}
-            alt=""
-            draggable={false}
-          />
+            aria-hidden="true"
+          >
+            <img
+              src={getPublicUrl(`/runtime/cube_B_v001/faces/dice_face_${face.value}.png`)}
+              alt=""
+              draggable={false}
+            />
+          </span>
         ))}
       </div>
     </div>
