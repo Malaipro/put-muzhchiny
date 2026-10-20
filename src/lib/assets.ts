@@ -2,7 +2,7 @@
  * Get correct URL for public/ assets
  * Works with both GitHub Pages and root deployments
  */
-export const PUBLIC_ASSET_REVISION = '2026-10-20-v4';
+export const PUBLIC_ASSET_REVISION = '2026-10-20-v5';
 
 export function getPublicUrl(path: string): string {
   const base = import.meta.env.BASE_URL || '/';

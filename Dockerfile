@@ -7,7 +7,7 @@ RUN npm ci
 
 # Amvera can reuse a previously built application layer after a repository
 # update. Change this revision for releases that must rebuild the full client.
-ARG APP_BUILD_REVISION=2026-10-20-v005-telegram-referrer-v5
+ARG APP_BUILD_REVISION=2026-10-20-v005-assets-after-referrer-v6
 RUN echo "$APP_BUILD_REVISION" > /tmp/put-muzhchiny-build-revision
 
 COPY . .
