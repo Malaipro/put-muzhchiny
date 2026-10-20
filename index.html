@@ -4,6 +4,12 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <!--
+      Telegram Mini Apps open the page with a very long tgWebAppData query.
+      Sending that full URL as Referer on every image request exceeds the
+      Amvera proxy header limit and makes otherwise valid assets return 400.
+    -->
+    <meta name="referrer" content="no-referrer" />
     <meta name="theme-color" content="#111310" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
