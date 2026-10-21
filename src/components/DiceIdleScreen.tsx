@@ -6,6 +6,7 @@ import { Dice3D } from './Dice3D';
 interface DiceIdleScreenProps {
   onRoll: () => void;
   onBack?: () => void;
+  onRules?: () => void;
   canRoll?: boolean;
   isBirth?: boolean;
 }
@@ -13,6 +14,7 @@ interface DiceIdleScreenProps {
 export function DiceIdleScreen({
   onRoll,
   onBack,
+  onRules,
   canRoll = true,
   isBirth = false,
 }: DiceIdleScreenProps) {
@@ -68,6 +70,9 @@ export function DiceIdleScreen({
         </button>
         {onBack && !isBirth && (
           <button onClick={onBack} className="gameplay-secondary-button">Вернуться к пути</button>
+        )}
+        {onRules && isBirth && (
+          <button onClick={onRules} className="gameplay-secondary-button">Правила</button>
         )}
       </div>
     </section>

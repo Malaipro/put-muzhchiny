@@ -5,9 +5,11 @@
 .v005-design .gameplay-primary-button:disabled {background-image:url('/v005/cta/cta_frame_disabled@2x.png?asset=2026-10-20-v5');}
 .v005-design .gameplay-card {background:#1d1914;border-color:#6e5133;}
 .designed-board {height:calc(100dvh - 80px - env(safe-area-inset-bottom));display:flex;flex-direction:column;padding:0 17px;}
-.board-header {height:174px;flex-shrink:0;text-align:center;padding-top:127px;font-family:Georgia,serif;color:#f5deb3;}
+.board-header {position:relative;height:174px;flex-shrink:0;text-align:center;padding-top:127px;font-family:Georgia,serif;color:#f5deb3;}
 .board-header h1 {font-size:25px;line-height:28px;text-shadow:0 2px 3px #000;}
 .board-header p {font-size:11px;}
+.board-rules-button {position:absolute;top:92px;right:2px;min-height:32px;padding:0 10px;border:1px solid #87664080;border-radius:999px;background:#171813b8;color:#d7cbb6;font:11px/1 system-ui,sans-serif;letter-spacing:.04em;}
+.board-rules-button:focus-visible {outline:2px solid #d3ae6f;outline-offset:3px;}
 .board-route {overflow-y:auto;min-height:0;flex:1;padding:14px 5px;scrollbar-width:thin;}
 .route-row {display:grid;grid-template-columns:repeat(9,minmax(0,1fr));position:relative;gap:0;margin-bottom:12px;}
 .route-row:before {content:'';position:absolute;left:4%;right:4%;height:7px;top:calc(50% - 3px);background:url('/v005/map/chain_horizontal.png?asset=2026-10-20-v5') center/90px 12px repeat-x;}

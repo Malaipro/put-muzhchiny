@@ -1,6 +1,7 @@
 import { useState } from 'react';
 
 import { getPublicUrl } from '../lib/assets';
+import { RulesScreen } from './RulesScreen';
 
 interface OnboardingProps {
   onStart: (query: string) => void;
@@ -10,18 +11,10 @@ export function Onboarding({ onStart }: OnboardingProps) {
   const [query, setQuery] = useState('');
   const [step, setStep] = useState(0);
 
-  const steps = [
-    {
-      title: 'ПУТЬ МУЖЧИНЫ',
-      subtitle: '72 состояния. Трансформационная игра КЭМП.',
-      text: 'Кубик определяет маршрут. Смысл создаёт то, как мужчина проживает выпавшую клетку. Осознание без действия не засчитывается.',
-    },
-    {
-      title: 'Запрос',
-      subtitle: 'С каким вопросом ты входишь в Путь?',
-      text: 'Один вопрос или жизненная тема. Запрос сохраняется неизменным в течение прохождения.',
-    },
-  ];
+  const queryStep = {
+    subtitle: 'С каким вопросом ты входишь в Путь?',
+    text: 'Один вопрос или жизненная тема. Запрос сохраняется неизменным в течение прохождения.',
+  };
 
   if (step === 0) {
     return (
@@ -63,17 +56,27 @@ export function Onboarding({ onStart }: OnboardingProps) {
     );
   }
 
+  if (step === 1) {
+    return (
+      <RulesScreen
+        onBack={() => setStep(0)}
+        onContinue={() => setStep(2)}
+        continueLabel="Сформулировать запрос"
+      />
+    );
+  }
+
   return (
     <section className="gameplay-screen flex min-h-dvh flex-col px-5 pb-[calc(env(safe-area-inset-bottom)+28px)] pt-[calc(env(safe-area-inset-top)+24px)]">
       <header className="flex items-center justify-between">
-        <button onClick={() => setStep(0)} className="gameplay-back">← Назад</button>
+        <button onClick={() => setStep(1)} className="gameplay-back">← Назад</button>
         <span className="gameplay-eyebrow">ПЕРЕД НАЧАЛОМ</span>
       </header>
 
       <div className="mt-7">
         <p className="gameplay-eyebrow">ИСХОДНАЯ ТОЧКА</p>
         <h1 className="gameplay-title mt-2">Твой запрос</h1>
-        <p className="mt-3 text-[15px] leading-[1.55] text-muted">{steps[1].subtitle}</p>
+        <p className="mt-3 text-[15px] leading-[1.55] text-muted">{queryStep.subtitle}</p>
       </div>
 
       <label className="mt-7 block">
@@ -90,7 +93,7 @@ export function Onboarding({ onStart }: OnboardingProps) {
       <article className="gameplay-card mt-4">
         <span className="gameplay-card__label">ВАЖНО</span>
         <p className="mt-2 text-sm leading-[1.55] text-bone/78">
-          {steps[1].text} Все клетки и ответы будут рассматриваться через эту исходную точку.
+          {queryStep.text} Все клетки и ответы будут рассматриваться через эту исходную точку.
         </p>
       </article>
 

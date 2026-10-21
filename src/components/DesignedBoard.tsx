@@ -4,7 +4,7 @@ import { getCellById } from '../lib/cells';
 import { getPublicUrl } from '../lib/assets';
 import { isPlaytest } from '../lib/playtest';
 
-export function DesignedBoard({game, currentVisit, onRoll, onOpenCell}: {game: GameState; currentVisit: VisitRecord | null; onRoll: () => void; onOpenCell: () => void}) {
+export function DesignedBoard({game, currentVisit, onRoll, onOpenCell, onOpenRules}: {game: GameState; currentVisit: VisitRecord | null; onRoll: () => void; onOpenCell: () => void; onOpenRules: () => void}) {
   const current = useRef<HTMLSpanElement>(null);
   useEffect(() => { current.current?.scrollIntoView({block:'nearest'}); }, [game.currentCellId]);
   const visits = getVisits();
@@ -12,7 +12,10 @@ export function DesignedBoard({game, currentVisit, onRoll, onOpenCell}: {game: G
   const ready = canRoll(game);
   const rows = Array.from({length:8}, (_,r) => Array.from({length:9}, (_,c) => r*9+(r%2 ? 9-c : c+1)));
   return <section className="designed-board">
-    <header className="board-header"><h1>Карта пути</h1><p>Путь Мужчины</p></header>
+    <header className="board-header">
+      <button type="button" onClick={onOpenRules} className="board-rules-button">Правила</button>
+      <h1>Карта пути</h1><p>Путь Мужчины</p>
+    </header>
     <div className="board-route" aria-label="Карта из 72 клеток">
       {rows.map((row,r) => <div className={`route-row ${r%2 ? 'reverse':''}`} key={r}>{row.map(id => {
         const info = getCellById(id);

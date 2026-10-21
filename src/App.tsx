@@ -28,6 +28,7 @@ import { SectionPlaceholder } from './components/SectionPlaceholder';
 import { ReflectionsScreen } from './components/ReflectionsScreen';
 import { useV005Design } from './lib/playtest';
 import { DesignedBoard } from './components/DesignedBoard';
+import { RulesScreen } from './components/RulesScreen';
 import './playtest.css';
 
 function App() {
@@ -161,7 +162,7 @@ function App() {
       <main className="flex-1 overflow-y-auto pb-[calc(72px+env(safe-area-inset-bottom))]">
         {screen === 'map' && (
           <div className="px-safe">
-            {useV005Design ? <DesignedBoard game={game} currentVisit={currentVisit} onRoll={() => setScreen('dice')} onOpenCell={() => {
+            {useV005Design ? <DesignedBoard game={game} currentVisit={currentVisit} onRoll={() => setScreen('dice')} onOpenRules={() => setScreen('rules')} onOpenCell={() => {
               if (game.status === 'transition_pending' && currentCell?.transitionTarget) {
                 setTransition({ type: currentCell.transitionType as 'support' | 'breakdown', from: currentCell.id, to: currentCell.transitionTarget });
                 setScreen('transition');
@@ -181,6 +182,7 @@ function App() {
             onBack={() => setScreen('map')}
             canRoll={true}
             isBirth={game.status === 'waiting_birth'}
+            onRules={() => setScreen('rules')}
           />
         )}
 
@@ -236,7 +238,12 @@ function App() {
             onRoll={handleRollBirth}
             canRoll={true}
             isBirth={true}
+            onRules={() => setScreen('rules')}
           />
+        )}
+
+        {screen === 'rules' && (
+          <RulesScreen onBack={() => setScreen(game.status === 'waiting_birth' ? 'waiting_birth' : 'map')} />
         )}
       </main>
 
