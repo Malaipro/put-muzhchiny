@@ -88,6 +88,7 @@ export function useTelegram() {
 
   return {
     tg,
+    initData: tg?.initData ?? '',
     isInTelegram,
     // Cosmetic display only. Never use initDataUnsafe as proof of identity.
     user: tg?.initDataUnsafe?.user ?? null,

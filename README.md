@@ -14,6 +14,7 @@ npm run dev
 ```bash
 npm run build
 npm run lint
+npm run test:reminders
 ```
 
 ## Размещение
@@ -21,4 +22,4 @@ npm run lint
 - [AMVERA_DEPLOY.md](./AMVERA_DEPLOY.md) — запуск и проверка Amvera.
 - [BOT_SETUP.md](./BOT_SETUP.md) — подключение готового HTTPS-адреса к Telegram.
 
-Текущий прогресс игры хранится локально в браузере. Серверная синхронизация и Telegram-напоминания будут добавляться отдельно.
+Текущий прогресс игры хранится локально в браузере. Сервер в контейнере обслуживает готовую SPA-сборку и очередь Telegram-напоминаний в `/data`; настройка секретной переменной описана в [BOT_SETUP.md](./BOT_SETUP.md).

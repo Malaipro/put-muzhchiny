@@ -5,6 +5,7 @@ import { CELL_EXPERIENCE_HOURS, getInitialReflection, getReflections, type Visit
 import { isPlaytest } from '../lib/playtest';
 import { getCellIconPath, getCellImagePath } from '../lib/cellImages';
 import { getPublicUrl } from '../lib/assets';
+import type { ReminderStatus } from '../lib/reminders';
 
 type CellStage = 'short' | 'full' | 'initial' | 'waiting' | 'final';
 
@@ -17,6 +18,7 @@ interface CellViewProps {
   onBeginExperience: (questionId: string, questionText: string, challengeText: string, answer: string) => void;
   onComplete: (questionId: string, questionText: string, challengeText: string, answer: string) => void;
   onBack: () => void;
+  reminderStatus?: ReminderStatus;
 }
 
 function getQuestion(cell: Cell, visit: VisitRecord): string {
@@ -47,6 +49,7 @@ export function CellView({
   onBeginExperience,
   onComplete,
   onBack,
+  reminderStatus = 'unknown',
 }: CellViewProps) {
   const cell = originalCell;
   const repeated = isPlaytest && visit.visitMode !== 'introduction';
@@ -288,7 +291,10 @@ export function CellView({
             <p className="mt-2 text-[15px] leading-[1.5] text-bone">{cell.challenge}</p>
           </article>
           <p className="mt-4 text-center text-sm leading-[1.5] text-muted">
-            Когда время завершится, бот напомнит записать итог и вернуться к броску.
+            {reminderStatus === 'scheduled' && 'Напоминания включены: бот напишет через 6 часов, через 12 часов и повторно через сутки, если итог ещё не заполнен.'}
+            {reminderStatus === 'unavailable' && 'Открой игру из Telegram, чтобы включить напоминания бота.'}
+            {reminderStatus === 'error' && 'Не удалось включить Telegram-напоминания. Прогресс сохранён; попробуй снова, открыв игру из Telegram.'}
+            {reminderStatus === 'unknown' && 'Подключаем Telegram-напоминания…'}
           </p>
           <div className="mt-auto pt-7">
             <button onClick={onBack} className="gameplay-primary-button">Вернуться на Путь</button>

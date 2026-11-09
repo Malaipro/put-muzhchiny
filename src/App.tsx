@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   getGame,
   createGame,
@@ -10,6 +10,8 @@ import {
   getCurrentVisit,
   isVisitUnlocked,
   getGameStats,
+  getInitialReflection,
+  getVisits,
   clearGame,
   type GameState,
   type RollResult,
@@ -29,6 +31,11 @@ import { ReflectionsScreen } from './components/ReflectionsScreen';
 import { useV005Design } from './lib/playtest';
 import { DesignedBoard } from './components/DesignedBoard';
 import { RulesScreen } from './components/RulesScreen';
+import {
+  cancelVisitReminders,
+  scheduleVisitReminders,
+  type ReminderStatus,
+} from './lib/reminders';
 import './playtest.css';
 
 function App() {
@@ -36,8 +43,10 @@ function App() {
   const [screen, setScreen] = useState<string>('map');
   const [lastRoll, setLastRoll] = useState<RollResult | null>(null);
   const [transition, setTransition] = useState<{ type: 'support' | 'breakdown'; from: number; to: number } | null>(null);
+  const [reminderStatuses, setReminderStatuses] = useState<Record<string, ReminderStatus>>({});
+  const reminderSyncRef = useRef('');
 
-  const { hapticImpact, hapticSuccess, hapticError, isInTelegram } = useTelegram();
+  const { hapticImpact, hapticSuccess, hapticError, isInTelegram, initData } = useTelegram();
 
   useEffect(() => {
     const refreshed = getGame();
@@ -50,6 +59,24 @@ function App() {
   const refreshGame = useCallback(() => {
     setGame(getGame());
   }, []);
+
+  useEffect(() => {
+    if (!initData || reminderSyncRef.current === initData) return;
+    reminderSyncRef.current = initData;
+
+    for (const visit of getVisits()) {
+      if (visit.completedAt) {
+        void cancelVisitReminders(initData, visit.visitId);
+        continue;
+      }
+      if (!visit.actionAcceptedAt) continue;
+      const cell = getCellById(visit.cellId);
+      if (!cell) continue;
+      const question = getInitialReflection(visit.visitId)?.questionText || cell.questions[0] || '';
+      void scheduleVisitReminders({ initData, visit, cell, question, mode: 'reconcile' })
+        .then((status) => setReminderStatuses((current) => ({ ...current, [visit.visitId]: status })));
+    }
+  }, [initData]);
 
   const handleCreateGame = (query: string) => {
     const g = createGame(query);
@@ -90,9 +117,15 @@ function App() {
     challengeText: string,
     answer: string,
   ) => {
-    beginVisitExperience(visitId, questionId, questionText, challengeText, answer);
+    const visit = beginVisitExperience(visitId, questionId, questionText, challengeText, answer);
     refreshGame();
     if (isInTelegram) hapticSuccess();
+    const cell = getCellById(visit.cellId);
+    if (cell) {
+      setReminderStatuses((current) => ({ ...current, [visit.visitId]: initData ? 'unknown' : 'unavailable' }));
+      void scheduleVisitReminders({ initData, visit, cell, question: questionText })
+        .then((status) => setReminderStatuses((current) => ({ ...current, [visit.visitId]: status })));
+    }
     setScreen('map');
   };
 
@@ -104,6 +137,7 @@ function App() {
     answer: string,
   ) => {
     const result = completeVisit(visitId, questionId, questionText, challengeText, answer);
+    void cancelVisitReminders(initData, visitId);
     refreshGame();
     if (isInTelegram) hapticSuccess();
     if (result.transition) {
@@ -139,11 +173,15 @@ function App() {
   };
 
   const handleReset = () => {
+    for (const visit of getVisits()) {
+      if (!visit.completedAt) void cancelVisitReminders(initData, visit.visitId);
+    }
     clearGame();
     setGame(null);
     setScreen('map');
     setLastRoll(null);
     setTransition(null);
+    setReminderStatuses({});
   };
 
   if (!game) {
@@ -202,6 +240,7 @@ function App() {
               handleCompleteVisit(currentVisit.visitId, questionId, questionText, challengeText, answer)
             )}
             onBack={() => setScreen('map')}
+            reminderStatus={reminderStatuses[currentVisit.visitId] ?? (initData ? 'unknown' : 'unavailable')}
           />
         )}
 
